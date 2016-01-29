@@ -158,7 +158,7 @@ public class ImagesResource {
     }
 
     Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {
-        int grid = 1;
+        int grid = 20;
         long W = sourceWidth/grid; 
         long H = sourceHeight/grid; 
         long w = targetWidth/grid;

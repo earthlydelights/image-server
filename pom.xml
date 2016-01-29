@@ -129,7 +129,7 @@
                                     <user>P1941866044</user>
                                     <password>${P1941866044PASSWORD}</password>
                                     <account>p1941866044trial</account>
-                                    <application>earthly_delights_garden_</application>
+                                    <application>imageserver</application>
                                     <source>${project.build.directory}/ROOT.war</source>
                                     <synchronous>true</synchronous>
                                     <uriEncoding>UTF-8</uriEncoding>

@@ -1,6 +1,6 @@
 package garden.delights.earthly.jaxrs;
 
-import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.UNIFORM;
+import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.*;
 
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
@@ -27,7 +27,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
@@ -44,17 +43,17 @@ public class ImagesResource {
     PrintStream sysout = null;
     
     public ImagesResource() throws Exception {
-        if (true) {
-            final Path path = Files.createTempFile("geppaequo-images-resource-test", ".txt");
+        if (System.getenv("HC_HOST") == null) {
+            final Path path = Files.createTempFile("images-resource", ".txt");
             System.out.println("Temp file : " + path);
-            // path.toFile().deleteOnExit();
+            path.toFile().deleteOnExit();
 
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
                 public void run() {
                     try {
-                        // Files.delete(path);
-                        // System.out.println("deleted file at " + path);
+                        Files.delete(path);
+                        System.out.println("deleted file at " + path);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -76,7 +75,6 @@ public class ImagesResource {
     @javax.ws.rs.Path("/crop")
     @Produces("image/jpeg")
     public Response crop(
-            // @DefaultValue("/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg") @QueryParam("url") String urlParam,
             @DefaultValue("1920") @QueryParam("width")   final int  widthParam,
             @DefaultValue("1080") @QueryParam("height")  final int  heightParam,
             @DefaultValue("50")   @QueryParam("quality") final int  qualityParam,
@@ -84,7 +82,9 @@ public class ImagesResource {
       ) throws IOException {
 
         // force source image
-        String urlParam = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
+        String  urlParam        = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
+        String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
+        URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
 
         // coerce quality from any integer to a float between 0 and 1
         final float quality; 
@@ -96,31 +96,16 @@ public class ImagesResource {
             quality = (float)qualityParam/100f;
         }
         
-        // get source URL
-        final URL url;
-        if (urlParam.startsWith("http")) {
-            url = URI.create(urlParam).toURL();
-        } else if (urlParam.startsWith("/"))  {
-            String applicationUrl = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
-            url = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
-        } else {
-            url = null;
-        }
-        
-        if (url == null) {
-            return Response.status(Status.NOT_FOUND).build();
-        }
-
-        if (source == null) {
-            source = ImageIO.read(url);
+        if (this.source == null) {
+            this.source = ImageIO.read(url);
             if (this.sysout != null) {
-                this.sysout.println(String.format("x\t%4d\ty\t%4d", source.getWidth(), source.getHeight()));
+                this.sysout.println(String.format("x\t%4d\ty\t%4d", this.source.getWidth(), this.source.getHeight()));
                 this.sysout.println("-----------------------------------------");
                 this.sysout.flush();
             }
         }
         
-        Rectangle<Long> rectangle = getCropRectangle(source.getWidth(), source.getHeight(), widthParam, heightParam);
+        Rectangle<Long> rectangle = getCropRectangle(this.source.getWidth(), this.source.getHeight(), widthParam, heightParam);
         
         final BufferedImage croppedImage = source.getSubimage( 
                 rectangle.x.intValue(), 
@@ -132,7 +117,6 @@ public class ImagesResource {
             @Override
             public void write(OutputStream os) throws IOException, WebApplicationException {
                 
-                // log.info("starting streaming");
                 try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(os)) {
                     // cf. http://www.universalwebservices.net/web-programming-resources/java/adjust-jpeg-image-compression-quality-when-saving-images-in-java
 
@@ -150,7 +134,6 @@ public class ImagesResource {
                 } catch (Exception e) {
                     log.error("ignored exception in StreamingOutput.write mehod" , e);
                 } finally {
-                    // log.info("streaming finished");
                 }
             }
         };

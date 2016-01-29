@@ -13,51 +13,43 @@ import org.junit.Test;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
 
-import garden.delights.earthly.randomizer.Computer;
-import garden.delights.earthly.randomizer.Computer.F;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
 
 public class ComputerTest {
 
-    static String dash = "-";
-    
-    @FunctionalInterface
-    interface F2 {
-        long get(long X, long Y, long x, long y);
-    }
-    
-    final F2 integrale = (a,b,c,d) -> ( c * c * d / 2) / ( a * a * b / 2);
-
     @Test
-    public void test0() {
-        Dimension<Long> big   = new Dimension<Long>(5L, 5L, a->(long)a);
-        Dimension<Long> small = new Dimension<Long>(2L,5L, a->(long)a);
-        System.out.println(integrale.get(5L, 5L, 5L, 5L));
-    }
-
-
-    // @Test
     public void test() throws IOException {
-        /* File file = new File("dugenou.txt"); */
+        Path path = null;
+        if (System.getenv("HC_HOST") == null) {
+            boolean keepFile = false; // true; // 
+            final Path otherPath = Files.createTempFile("computer-test-", ".txt");
+            path = otherPath;
+            System.out.println("output of " + ComputerTest.class.getSimpleName() + " written to tmp file : " + path);
+            if (!keepFile) path.toFile().deleteOnExit();
 
-        final Path path = Files.createTempFile("geppaequo-computer-test", ".txt");
-        System.out.println("Temp file : " + path);
-        // path.toFile().deleteOnExit();
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    // Files.delete(path);
-                    // System.out.println("deleted file at " + path);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        if (!keepFile) {
+                            Files.delete(otherPath);
+                            System.out.println("deleted file at " + otherPath);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+            });
+        }
+        
       
-        try (OutputStream fos = new FileOutputStream(path.toFile())){
-            PrintStream sysout = System.out; // new PrintStream(fos); // 
+        try (OutputStream fos = path==null ? null : new FileOutputStream(path.toFile())){
+            PrintStream sysout;
+            if (fos == null) {
+                sysout = System.out; 
+            } else {
+                sysout = new PrintStream(fos);
+            }
             
             final long SQUARE = 5;
 
@@ -97,19 +89,15 @@ public class ComputerTest {
         case 1:
             sysout.println("################################################################################");
             break;
-
         case 2:
             sysout.println("////////////////////////////////////////////////////////////////////////////////");
             break;
-
         case 3:
             sysout.println("--------------------------------------------------------------------------------");
             break;
-
         case 4:
             sysout.println(". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ");
             break;
-
         default:
             break;
         }

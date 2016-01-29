@@ -17,6 +17,7 @@ public class RectangleRandomizerUtilTest {
 
     @Test
     public void testDichotomy() {
+        @SuppressWarnings("unused")
         int Dw, Dh, dw, dh;
         RectangleRandomizer randomizer = new RectangleRandomizer(
                 Dw=8, Dh=7, 

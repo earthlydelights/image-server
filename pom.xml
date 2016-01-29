@@ -1,0 +1,148 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.aequologica.neo</groupId>
+        <artifactId>meios</artifactId>
+        <version>0.4.5-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>image-server</artifactId>
+    <version>0.4.5-SNAPSHOT</version>
+
+    <packaging>war</packaging>
+
+    <name>${project.groupId}:${project.artifactId}</name>
+
+    <description>earthly delights garden image server</description>
+
+    <scm>
+        <connection>scm:git:https://github.com/earthlydelights/image-server.git</connection>
+        <developerConnection>scm:git:https://github.com/earthlydelights/image-server.git</developerConnection>
+        <url>https://github.com/earthlydelights/image-server.git</url>
+    </scm>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.thetransactioncompany</groupId>
+            <artifactId>cors-filter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.aequologica.neo</groupId>
+            <artifactId>geppaequo-tags</artifactId>
+            <classifier>${java-version-classifier}</classifier>
+        </dependency>
+
+        <!-- BEGIN provided -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope> <!-- neo error java.lang.NoClassDefFoundError: org/slf4j/helpers/SubstituteLoggerFactory| -->
+        </dependency>
+        <!-- el-api -->
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- jsp -->
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- servlet -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- END provided -->
+
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>deploy</id>
+            <properties>
+                <shakuntala.skip>true</shakuntala.skip>
+            </properties>
+            <build>
+                <finalName>ROOT</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <configuration combine.self="override">
+                            <!-- no default value -->
+                            <failOnMissingWebXml>false</failOnMissingWebXml>
+                            <dependentWarExcludes>WEB-INF/web.xml,WEB-INF/lib/*geppaequo*.*,WEB-INF/lib/geppaequo*.*,WEB-INF/classes/META-INF/persistence.xml,META-INF/persistence.xml</dependentWarExcludes>
+                            <outputFileNameMapping>@{groupId}@...@{artifactId}@-@{version}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
+                            <attachClasses>true</attachClasses>
+                            <!-- cf. http://goo.gl/OV8Cu9 -->
+                            <packagingExcludes>*.png, META-INF/MANIFEST.MF, WEB-INF/lib/*slf4j-*.jar,WEB-INF/lib/*log4j-*.jar,WEB-INF/lib/*commons-logging-*.jar</packagingExcludes>
+                            <!--java7 / java8 dance -->
+                            <classifier />
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.sap.cloud</groupId>
+                        <artifactId>neo-java-web-maven-plugin</artifactId>
+                        <configuration>
+                            <!-- Configure proxy -->  
+                            <consoleHttpProxyHost>proxy</consoleHttpProxyHost>
+                            <consoleHttpProxyPort>8080</consoleHttpProxyPort>
+                            <consoleHttpsProxyHost>proxy</consoleHttpsProxyHost>
+                            <consoleHttpsProxyPort>8080</consoleHttpsProxyPort>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>initialize</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>install-sdk</goal>
+                                </goals>
+                                <configuration>
+                                    <sdkInstallPath>${project.build.directory}/sdk</sdkInstallPath>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>deploy</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>deploy</goal>
+                                    <goal>start</goal>
+                                </goals>
+                                <configuration>
+                                    <sdkInstallPath>${project.build.directory}/sdk</sdkInstallPath>
+                                    <host>hanatrial.ondemand.com</host>
+                                    <user>P1941866044</user>
+                                    <password>${P1941866044PASSWORD}</password>
+                                    <account>p1941866044trial</account>
+                                    <application>earthly_delights_garden_</application>
+                                    <source>${project.build.directory}/ROOT.war</source>
+                                    <synchronous>true</synchronous>
+                                    <uriEncoding>UTF-8</uriEncoding>
+                                    <compression>on</compression>
+                                    <compressibleMimeType>text/html,text/css,text/xml,text/plain,text/javascript,application/javascript,application/json</compressibleMimeType>
+                                    <maximumProcesses>2</maximumProcesses>
+                                    <javaVersion>8</javaVersion>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

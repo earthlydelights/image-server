@@ -105,13 +105,19 @@ public class ImagesResource {
             }
         }
         
-        Rectangle<Long> rectangle = getCropRectangle(this.source.getWidth(), this.source.getHeight(), widthParam, heightParam);
+        final BufferedImage croppedImage;
+        if (widthParam < this.source.getWidth() && heightParam < this.source.getHeight()) {
+            Rectangle<Long> rectangle = getCropRectangle(this.source.getWidth(), this.source.getHeight(), widthParam, heightParam);
+            
+            croppedImage = source.getSubimage( 
+                    rectangle.x.intValue(), 
+                    rectangle.y.intValue(), 
+                    rectangle.w.intValue(), 
+                    rectangle.h.intValue());
+        } else {
+            croppedImage = source;
+        }
         
-        final BufferedImage croppedImage = source.getSubimage( 
-                rectangle.x.intValue(), 
-                rectangle.y.intValue(), 
-                rectangle.w.intValue(), 
-                rectangle.h.intValue());
 
         StreamingOutput streamOut = new StreamingOutput() {
             @Override

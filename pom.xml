@@ -160,9 +160,9 @@
                                 <configuration>
                                     <sdkInstallPath>${project.build.directory}/sdk</sdkInstallPath>
                                     <host>hanatrial.ondemand.com</host>
-                                    <user>P1941866044</user>
-                                    <password>${P1941866044PASSWORD}</password>
-                                    <account>p1941866044trial</account>
+                                    <user>P${HCP_NUMBER}</user>
+                                    <password>${HCP_PASSWORD}</password>
+                                    <account>p${HCP_NUMBER}trial</account>
                                     <application>imageserver</application>
                                     <source>${project.build.directory}/ROOT.war</source>
                                     <synchronous>true</synchronous>
@@ -178,6 +178,7 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 
 </project>

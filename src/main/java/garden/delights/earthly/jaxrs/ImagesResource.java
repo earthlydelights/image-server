@@ -1,6 +1,7 @@
 package garden.delights.earthly.jaxrs;
 
-import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.*;
+import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.UNIFORM;
+import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
 
 import java.awt.image.BufferedImage;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
@@ -33,13 +35,17 @@ import javax.ws.rs.core.UriBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import garden.delights.earthly.randomizer.RectangleRandomizer;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
+import net.aequologica.neo.imageserver.config.ImageServerConfig;
 
 @Singleton
 @javax.ws.rs.Path("/image/v1")
 public class ImagesResource {
-    
+
     PrintStream sysout = null;
     
     public ImagesResource() throws Exception {
@@ -70,6 +76,48 @@ public class ImagesResource {
     private final static Logger log = LoggerFactory.getLogger(ImagesResource.class);
 
     private BufferedImage source;
+    
+    @JsonIgnoreProperties
+    public static class Dim {
+
+        @JsonProperty
+        private long width;
+        @JsonProperty
+        private long height;
+        
+        public Dim() {
+            super();
+        }
+
+        public Dim(long width, long height) {
+            super();
+            this.width = width;
+            this.height = height;
+        }
+
+        public long getWidth() {
+            return width;
+        }
+        public void setWidth(long width) {
+            this.width = width;
+        }
+        public long getHeight() {
+            return height;
+        }
+        public void setHeight(long height) {
+            this.height = height;
+        }
+    }
+
+    @GET
+    @javax.ws.rs.Path("/metadata")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Dim metadata(
+            @Context javax.servlet.http.HttpServletRequest request
+      ) throws IOException {
+        lazyLoadImage(request);
+        return new Dim(this.source.getWidth(), this.source.getHeight());
+    }
 
     @GET
     @javax.ws.rs.Path("/crop")
@@ -81,11 +129,8 @@ public class ImagesResource {
             @Context javax.servlet.http.HttpServletRequest request
       ) throws IOException {
 
-        // force source image
-        String  urlParam        = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
-        String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
-        URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
-
+        lazyLoadImage(request);
+        
         // coerce quality from any integer to a float between 0 and 1
         final float quality; 
         if (qualityParam <= 0) {
@@ -94,15 +139,6 @@ public class ImagesResource {
             quality = 1f;
         } else {
             quality = (float)qualityParam/100f;
-        }
-        
-        if (this.source == null) {
-            this.source = ImageIO.read(url);
-            if (this.sysout != null) {
-                this.sysout.println(String.format("x\t%4d\ty\t%4d", this.source.getWidth(), this.source.getHeight()));
-                this.sysout.println("-----------------------------------------");
-                this.sysout.flush();
-            }
         }
         
         final BufferedImage croppedImage;
@@ -117,7 +153,6 @@ public class ImagesResource {
         } else {
             croppedImage = source;
         }
-        
 
         StreamingOutput streamOut = new StreamingOutput() {
             @Override
@@ -144,6 +179,28 @@ public class ImagesResource {
             }
         };
         return Response.ok(streamOut).build();
+    }
+
+    private BufferedImage lazyLoadImage(javax.servlet.http.HttpServletRequest request) throws IOException {
+
+        if (this.source == null) {
+            ImageServerConfig config = getConfig(ImageServerConfig.class);
+            String  urlParam         = config.getImage();
+            if (urlParam == null) {
+                urlParam = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
+            }
+            String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
+            URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
+
+            this.source = ImageIO.read(url);
+            
+            if (this.sysout != null) {
+                this.sysout.println(String.format("x\t%4d\ty\t%4d", this.source.getWidth(), this.source.getHeight()));
+                this.sysout.println("-----------------------------------------");
+                this.sysout.flush();
+            }
+        }
+        return this.source;
     }
 
     Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {

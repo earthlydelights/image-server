@@ -8,10 +8,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -21,6 +23,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
@@ -29,8 +32,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,79 +51,29 @@ import net.aequologica.neo.imageserver.config.ImageServerConfig;
 @javax.ws.rs.Path("/image/v1")
 public class ImagesResource {
 
-    PrintStream sysout = null;
-    
-    public ImagesResource() throws Exception {
-        if (System.getenv("HC_HOST") == null) {
-            final Path path = Files.createTempFile("images-resource", ".txt");
-            System.out.println("Temp file : " + path);
-            path.toFile().deleteOnExit();
-
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        Files.delete(path);
-                        System.out.println("deleted file at " + path);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-
-            final OutputStream fos = new FileOutputStream(path.toFile());
-            this.sysout = new PrintStream(fos);
-            this.sysout.println(path.toAbsolutePath().toString());
-            this.sysout.flush();
-        }
-    }
-
     private final static Logger log = LoggerFactory.getLogger(ImagesResource.class);
 
-    private BufferedImage source;
+    final ThreadSafeBufferedImage threadSafeSource;
     
-    @JsonIgnoreProperties
-    public static class Dim {
-
-        @JsonProperty
-        private long width;
-        @JsonProperty
-        private long height;
-        
-        public Dim() {
-            super();
-        }
-
-        public Dim(long width, long height) {
-            super();
-            this.width = width;
-            this.height = height;
-        }
-
-        public long getWidth() {
-            return width;
-        }
-        public void setWidth(long width) {
-            this.width = width;
-        }
-        public long getHeight() {
-            return height;
-        }
-        public void setHeight(long height) {
-            this.height = height;
-        }
+    public ImagesResource() {
+        this.threadSafeSource = new ThreadSafeBufferedImage();
     }
 
     @GET
     @javax.ws.rs.Path("/metadata")
     @Produces(MediaType.APPLICATION_JSON)
-    public Dim metadata(
-            @Context javax.servlet.http.HttpServletRequest request
-      ) throws IOException {
-        lazyLoadImage(request);
-        return new Dim(this.source.getWidth(), this.source.getHeight());
+    public Dim metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
+        this.threadSafeSource.lazyLoadImage(request);
+        return this.threadSafeSource.getDim();
     }
 
+    @GET
+    @javax.ws.rs.Path("/reload")
+    public Response reload(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
+        this.threadSafeSource.loadImage(request, true /* forces reload */);
+        return Response.ok(Status.NO_CONTENT).build();
+    }
+    
     @GET
     @javax.ws.rs.Path("/crop")
     @Produces("image/jpeg")
@@ -129,7 +84,7 @@ public class ImagesResource {
             @Context javax.servlet.http.HttpServletRequest request
       ) throws IOException {
 
-        lazyLoadImage(request);
+        this.threadSafeSource.lazyLoadImage(request);
         
         // coerce quality from any integer to a float between 0 and 1
         final float quality; 
@@ -141,18 +96,7 @@ public class ImagesResource {
             quality = (float)qualityParam/100f;
         }
         
-        final BufferedImage croppedImage;
-        if (widthParam < this.source.getWidth() && heightParam < this.source.getHeight()) {
-            Rectangle<Long> rectangle = getCropRectangle(this.source.getWidth(), this.source.getHeight(), widthParam, heightParam);
-            
-            croppedImage = source.getSubimage( 
-                    rectangle.x.intValue(), 
-                    rectangle.y.intValue(), 
-                    rectangle.w.intValue(), 
-                    rectangle.h.intValue());
-        } else {
-            croppedImage = source;
-        }
+        final BufferedImage croppedImage = this.threadSafeSource.getCroppedImage(widthParam, heightParam);
 
         StreamingOutput streamOut = new StreamingOutput() {
             @Override
@@ -181,86 +125,160 @@ public class ImagesResource {
         return Response.ok(streamOut).build();
     }
 
-    private BufferedImage lazyLoadImage(javax.servlet.http.HttpServletRequest request) throws IOException {
-
-        if (this.source == null) {
-            ImageServerConfig config = getConfig(ImageServerConfig.class);
-            String  urlParam         = config.getImage();
-            if (urlParam == null) {
-                urlParam = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
+    private class ThreadSafeBufferedImage {
+        final private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+        
+        private BufferedImage source;
+        
+        private Dim getDim() {
+            this.lock.readLock().lock();
+            if (this.source == null) {
+                throw new IllegalStateException("no image loaded");
             }
-            String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
-            URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
+            try {
+                return new Dim(this.source.getWidth(), this.source.getHeight());
+            } finally {
+                this.lock.readLock().unlock();
+            }
+        }
+        
+        private void loadImage(HttpServletRequest request, boolean force) throws IOException {
+            if (this.source != null && !force) {
+                return;
+            }
+            this.lock.writeLock().lock();
+            try {
+                ImageServerConfig config = getConfig(ImageServerConfig.class);
+                String  urlParam         = config.getImage();
+                if (urlParam == null) {
+                    urlParam = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
+                }
+                String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
+                URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
 
-            this.source = ImageIO.read(url);
+                this.source = ImageIO.read(url);
+            } finally {
+                this.lock.writeLock().unlock();
+            }       
+        }
+
+        private void lazyLoadImage(HttpServletRequest request) throws IOException {
+            loadImage(request, false);
+        }
+        
+        private BufferedImage getCroppedImage(final int widthParam, final int heightParam) throws IOException {
+            this.lock.readLock().lock();
+            try {
+                final BufferedImage croppedImage;
+                if (widthParam < this.source.getWidth() && heightParam < this.source.getHeight()) {
+                    Rectangle<Long> rectangle = getCropRectangle(this.source.getWidth(), this.source.getHeight(), widthParam, heightParam);
+                    
+                    croppedImage = this.source.getSubimage( 
+                            rectangle.x.intValue(), 
+                            rectangle.y.intValue(), 
+                            rectangle.w.intValue(), 
+                            rectangle.h.intValue());
+                } else {
+                    croppedImage = this.source;
+                }
+                return croppedImage;
+            } finally {
+                this.lock.readLock().unlock();
+            }
+        }
+
+        private Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {
+            int grid = 20;
+            long W = sourceWidth/grid; 
+            long H = sourceHeight/grid; 
+            long w = targetWidth/grid;
+            long h = targetHeight/grid; 
+            final RectangleRandomizer   randomizer  = new RectangleRandomizer(
+                    W, 
+                    H, 
+                    w,
+                    h, 
+                    UNIFORM);
+            final Rectangle<Long> random = randomizer.getRandomRectangle();
+            long x = random.x.longValue()*grid;
+            long y = random.y.longValue()*grid;
+            long width = (long)Math.floor(Math.min(random.w.longValue()*grid, targetWidth));
+            long height = (long)Math.floor(Math.min(random.h.longValue()*grid, targetHeight));
+            final Rectangle<Long> rectangle = new Rectangle<Long>(
+                    x,
+                    y,
+                    width,
+                    height, 
+                    a->(long)a);
             
-            if (this.sysout != null) {
-                this.sysout.println(String.format("x\t%4d\ty\t%4d", this.source.getWidth(), this.source.getHeight()));
-                this.sysout.println("-----------------------------------------");
-                this.sysout.flush();
+            final boolean tooWide = ( x + width  > sourceWidth  );
+            final boolean tooHigh = ( y + height > sourceHeight );
+            
+            log.info("\n"+
+                    "    {}.{} | {}x{} [source]\n"+
+                    "    {}.{} + {} {} [crop]\n"+
+                    "    {}x{} = {}.{} [bottom right corner of crop]\n"+
+                    "    crop too wide ? {} !\n"+
+                    "    crop too high ? {} !\n", 
+                    String.format("%04d", 0), 
+                    String.format("%04d", 0), 
+                    String.format("%04d", sourceWidth), 
+                    String.format("%04d", sourceHeight), 
+                    String.format("%04d", x), 
+                    String.format("%04d", y),
+                    "    ",
+                    "    ",
+                    String.format("%04d", width), 
+                    String.format("%04d", height), 
+                    String.format("%04d", x + width), 
+                    String.format("%04d", y + height), 
+                    tooWide ? "yes" : "no", 
+                    tooHigh ? "yes" : "no");
+
+            if (tooWide || tooHigh) {
+                throw new IndexOutOfBoundsException();
             }
+
+            return rectangle;
         }
-        return this.source;
+
+        
     }
+    
+    @JsonIgnoreProperties
+    public static class Dim {
 
-    Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {
-        int grid = 20;
-        long W = sourceWidth/grid; 
-        long H = sourceHeight/grid; 
-        long w = targetWidth/grid;
-        long h = targetHeight/grid; 
-        final RectangleRandomizer   randomizer  = new RectangleRandomizer(
-                W, 
-                H, 
-                w,
-                h, 
-                UNIFORM);
-        final Rectangle<Long> random = randomizer.getRandomRectangle();
-        long x = random.x.longValue()*grid;
-        long y = random.y.longValue()*grid;
-        long width = (long)Math.floor(Math.min(random.w.longValue()*grid, targetWidth));
-        long height = (long)Math.floor(Math.min(random.h.longValue()*grid, targetHeight));
-        final Rectangle<Long> rectangle = new Rectangle<Long>(
-                x,
-                y,
-                width,
-                height, 
-                a->(long)a);
+        @JsonProperty
+        private long width;
+        @JsonProperty
+        private long height;
         
-        if (this.sysout != null) {
-            this.sysout.println(String.format("x\t%4d\ty\t%4d", x, y));
-            this.sysout.flush();
+        public Dim() {
+            super();
         }
 
-        final boolean tooWide = ( x + width  > sourceWidth  );
-        final boolean tooHigh = ( y + height > sourceHeight );
-        
-        log.info("\n"+
-                "    {}.{} | {}x{} [source]\n"+
-                "    {}.{} + {} {} [crop]\n"+
-                "    {}x{} = {}.{} [bottom right corner of crop]\n"+
-                "    crop too wide ? {} !\n"+
-                "    crop too high ? {} !\n", 
-                String.format("%04d", 0), 
-                String.format("%04d", 0), 
-                String.format("%04d", sourceWidth), 
-                String.format("%04d", sourceHeight), 
-                String.format("%04d", x), 
-                String.format("%04d", y),
-                "    ",
-                "    ",
-                String.format("%04d", width), 
-                String.format("%04d", height), 
-                String.format("%04d", x + width), 
-                String.format("%04d", y + height), 
-                tooWide ? "yes" : "no", 
-                tooHigh ? "yes" : "no");
-
-        if (tooWide || tooHigh) {
-            throw new IndexOutOfBoundsException();
+        public Dim(long width, long height) {
+            super();
+            this.width = width;
+            this.height = height;
         }
 
-        return rectangle;
+        public long getWidth() {
+            return width;
+        }
+        
+        public void setWidth(long width) {
+            this.width = width;
+        }
+        
+        public long getHeight() {
+            return height;
+        }
+        
+        public void setHeight(long height) {
+            this.height = height;
+        }
+        
     }
 
 }

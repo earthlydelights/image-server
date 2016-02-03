@@ -69,6 +69,7 @@ public class ImagesResource {
 
     @GET
     @javax.ws.rs.Path("/reload")
+    @Produces(MediaType.TEXT_PLAIN)
     public Response reload(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
         this.threadSafeSource.loadImage(request, true /* forces reload */);
         return Response.ok(Status.NO_CONTENT).build();

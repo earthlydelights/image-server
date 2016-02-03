@@ -4,15 +4,10 @@ import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.UNIFOR
 import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
 
 import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.IIOImage;
@@ -35,7 +30,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
-import javax.ws.rs.core.UriBuilderException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,10 +126,10 @@ public class ImagesResource {
         private BufferedImage source;
         
         private Dim getDim() {
-            this.lock.readLock().lock();
             if (this.source == null) {
                 throw new IllegalStateException("no image loaded");
             }
+            this.lock.readLock().lock();
             try {
                 return new Dim(this.source.getWidth(), this.source.getHeight());
             } finally {
@@ -168,82 +162,24 @@ public class ImagesResource {
         }
         
         private BufferedImage getCroppedImage(final int widthParam, final int heightParam) throws IOException {
+            BufferedImage ret;
             this.lock.readLock().lock();
             try {
-                final BufferedImage croppedImage;
-                if (widthParam < this.source.getWidth() && heightParam < this.source.getHeight()) {
-                    Rectangle<Long> rectangle = getCropRectangle(this.source.getWidth(), this.source.getHeight(), widthParam, heightParam);
-                    
-                    croppedImage = this.source.getSubimage( 
-                            rectangle.x.intValue(), 
-                            rectangle.y.intValue(), 
-                            rectangle.w.intValue(), 
-                            rectangle.h.intValue());
-                } else {
-                    croppedImage = this.source;
-                }
-                return croppedImage;
+                ret = this.source;
             } finally {
                 this.lock.readLock().unlock();
             }
-        }
-
-        private Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {
-            int grid = 20;
-            long W = sourceWidth/grid; 
-            long H = sourceHeight/grid; 
-            long w = targetWidth/grid;
-            long h = targetHeight/grid; 
-            final RectangleRandomizer   randomizer  = new RectangleRandomizer(
-                    W, 
-                    H, 
-                    w,
-                    h, 
-                    UNIFORM);
-            final Rectangle<Long> random = randomizer.getRandomRectangle();
-            long x = random.x.longValue()*grid;
-            long y = random.y.longValue()*grid;
-            long width = (long)Math.floor(Math.min(random.w.longValue()*grid, targetWidth));
-            long height = (long)Math.floor(Math.min(random.h.longValue()*grid, targetHeight));
-            final Rectangle<Long> rectangle = new Rectangle<Long>(
-                    x,
-                    y,
-                    width,
-                    height, 
-                    a->(long)a);
-            
-            final boolean tooWide = ( x + width  > sourceWidth  );
-            final boolean tooHigh = ( y + height > sourceHeight );
-            
-            log.info("\n"+
-                    "    {}.{} | {}x{} [source]\n"+
-                    "    {}.{} + {} {} [crop]\n"+
-                    "    {}x{} = {}.{} [bottom right corner of crop]\n"+
-                    "    crop too wide ? {} !\n"+
-                    "    crop too high ? {} !\n", 
-                    String.format("%04d", 0), 
-                    String.format("%04d", 0), 
-                    String.format("%04d", sourceWidth), 
-                    String.format("%04d", sourceHeight), 
-                    String.format("%04d", x), 
-                    String.format("%04d", y),
-                    "    ",
-                    "    ",
-                    String.format("%04d", width), 
-                    String.format("%04d", height), 
-                    String.format("%04d", x + width), 
-                    String.format("%04d", y + height), 
-                    tooWide ? "yes" : "no", 
-                    tooHigh ? "yes" : "no");
-
-            if (tooWide || tooHigh) {
-                throw new IndexOutOfBoundsException();
+            if (widthParam < ret.getWidth() && heightParam < ret.getHeight()) {
+                Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam);
+                
+                ret = this.source.getSubimage( 
+                        rectangle.x.intValue(), 
+                        rectangle.y.intValue(), 
+                        rectangle.w.intValue(), 
+                        rectangle.h.intValue());
             }
-
-            return rectangle;
+            return ret;
         }
-
-        
     }
     
     @JsonIgnoreProperties
@@ -280,6 +216,61 @@ public class ImagesResource {
             this.height = height;
         }
         
+    }
+    
+    static private Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {
+        int grid = 20;
+        long W = sourceWidth/grid; 
+        long H = sourceHeight/grid; 
+        long w = targetWidth/grid;
+        long h = targetHeight/grid; 
+        final RectangleRandomizer   randomizer  = new RectangleRandomizer(
+                W, 
+                H, 
+                w,
+                h, 
+                UNIFORM);
+        final Rectangle<Long> random = randomizer.getRandomRectangle();
+        long x = random.x.longValue()*grid;
+        long y = random.y.longValue()*grid;
+        long width = (long)Math.floor(Math.min(random.w.longValue()*grid, targetWidth));
+        long height = (long)Math.floor(Math.min(random.h.longValue()*grid, targetHeight));
+        final Rectangle<Long> rectangle = new Rectangle<Long>(
+                x,
+                y,
+                width,
+                height, 
+                a->(long)a);
+        
+        final boolean tooWide = ( x + width  > sourceWidth  );
+        final boolean tooHigh = ( y + height > sourceHeight );
+        
+        log.info("\n"+
+                "    {}.{} | {}x{} [source]\n"+
+                "    {}.{} + {} {} [crop]\n"+
+                "    {}x{} = {}.{} [bottom right corner of crop]\n"+
+                "    crop too wide ? {} !\n"+
+                "    crop too high ? {} !\n", 
+                String.format("%04d", 0), 
+                String.format("%04d", 0), 
+                String.format("%04d", sourceWidth), 
+                String.format("%04d", sourceHeight), 
+                String.format("%04d", x), 
+                String.format("%04d", y),
+                "    ",
+                "    ",
+                String.format("%04d", width), 
+                String.format("%04d", height), 
+                String.format("%04d", x + width), 
+                String.format("%04d", y + height), 
+                tooWide ? "yes" : "no", 
+                tooHigh ? "yes" : "no");
+
+        if (tooWide || tooHigh) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        return rectangle;
     }
 
 }

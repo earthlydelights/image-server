@@ -37,7 +37,7 @@ $(document).ready(function() {
     $('#title').text(data.title);
     $('#width').text(data.width);
     $('#height').text(data.height);
-    $('#image').attr("href", Geppaequo.contextPath + data.image);
+    $('#image').attr("href", "${pageContext.request.contextPath}" + data.image);
     $('#wikipedia').attr("href", data.wikipedia);
   });
   

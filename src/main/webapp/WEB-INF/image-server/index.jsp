@@ -15,9 +15,9 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 <h1 id="title"></h1>
 
-<button type="button" class="btn btn-secondary btn-sm"><a id="image" href="#"><span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a></button>
+<a id="image"     class="btn btn-secondary btn-sm" href="#" role="button"><span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
 
-<button type="button" class="btn btn-secondary btn-sm"><a id="wikipedia" href="#">wikipedia article</a></button>
+<a id="wikipedia" class="btn btn-secondary btn-sm" href="#" role="button">wikipedia article</a>
 
 <hr/>
 

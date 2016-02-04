@@ -24,5 +24,25 @@ public final class ImageServerConfig extends AbstractConfig {
         set("image", image);
     }
 
+    @Managed
+    public String getTitle() {
+        return get("title");
+    }
+
+    @Managed
+    public void setTitle(String title) {
+        set("title", title);
+    }
+
+    @Managed
+    public String getWikipedia() {
+        return get("wikipedia");
+    }
+
+    @Managed
+    public void setWikipedia(String wikipedia) {
+        set("wikipedia", wikipedia);
+    }
+
     
 }

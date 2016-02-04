@@ -62,9 +62,9 @@ public class ImagesResource {
     @GET
     @javax.ws.rs.Path("/metadata")
     @Produces(MediaType.APPLICATION_JSON)
-    public Dim metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
+    public Metadata metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
         this.threadSafeSource.lazyLoadImage(request);
-        return this.threadSafeSource.getDim();
+        return this.threadSafeSource.getMetadata();
     }
 
     @GET
@@ -155,34 +155,39 @@ public class ImagesResource {
         final private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
         
         private BufferedImage source;
+        private Metadata metadata;
         
-        private Dim getDim() {
-            if (this.source == null) {
+        private Metadata getMetadata() {
+            if (this.metadata == null) {
                 throw new IllegalStateException("no image loaded");
             }
-            this.lock.readLock().lock();
-            try {
-                return new Dim(this.source.getWidth(), this.source.getHeight());
-            } finally {
-                this.lock.readLock().unlock();
-            }
+            return this.metadata;
         }
         
         private void loadImage(HttpServletRequest request, boolean force) throws IOException {
             if (this.source != null && !force) {
                 return;
             }
+            
             this.lock.writeLock().lock();
             try {
-                ImageServerConfig config = getConfig(ImageServerConfig.class);
-                String  urlParam         = config.getImage();
+                ImageServerConfig config   = getConfig(ImageServerConfig.class);
+                String            urlParam = config.getImage();
                 if (urlParam == null) {
-                    urlParam = "/geppaequo-api/stnemucod/v1/document/images/bosch-the-garden-of-earthly-delights.jpg";
+                    throw new IllegalStateException("no image configured");
                 }
                 String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
                 URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
 
                 this.source = ImageIO.read(url);
+                
+                this.metadata = new Metadata(
+                        this.source.getWidth(), 
+                        this.source.getHeight(),
+                        config.getTitle(), 
+                        config.getImage(), 
+                        config.getWikipedia());
+
             } finally {
                 this.lock.writeLock().unlock();
             }       
@@ -225,21 +230,30 @@ public class ImagesResource {
     }
     
     @JsonIgnoreProperties
-    public static class Dim {
+    public static class Metadata {
 
         @JsonProperty
         private long width;
         @JsonProperty
         private long height;
+        @JsonProperty
+        private String title;
+        @JsonProperty
+        private String wikipedia;
+        @JsonProperty
+        private String image;
         
-        public Dim() {
+        public Metadata() {
             super();
         }
 
-        public Dim(long width, long height) {
+        public Metadata(long width, long height, String title, String image, String wikipedia) {
             super();
             this.width = width;
             this.height = height;
+            this.title = title;
+            this.image = image;
+            this.wikipedia = wikipedia;
         }
 
         public long getWidth() {
@@ -256,6 +270,30 @@ public class ImagesResource {
         
         public void setHeight(long height) {
             this.height = height;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getImage() {
+            return image;
+        }
+
+        public void setImage(String image) {
+            this.image = image;
+        }
+
+        public String getWikipedia() {
+            return wikipedia;
+        }
+
+        public void setWikipedia(String wikipedia) {
+            this.wikipedia = wikipedia;
         }
         
     }

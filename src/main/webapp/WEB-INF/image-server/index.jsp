@@ -13,7 +13,13 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 %><t:layout module="image-server">
 
-<h1>image-server</h1>
+<h1 id="title"></h1>
+
+<button type="button" class="btn btn-secondary btn-sm"><a id="image" href="#">image</a></button>
+
+<button type="button" class="btn btn-secondary btn-sm"><a id="wikipedia" href="#">wikipedia article</a></button>
+
+<hr/>
 
 <div id="tester" style="width:100%;height:auto;"></div>
 
@@ -25,20 +31,27 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 $(document).ready(function() {
 
-    TESTER = document.getElementById('tester');
-    Plotly.plot( TESTER, [{
-    x: [
+  $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
+    $('#title').text(data.title);
+    $('#image').attr("href", "<c:url value='/' />" + data.image);
+    $('#wikipedia').attr("href", data.wikipedia);
+  });
+  
+
+  TESTER = document.getElementById('tester');
+  Plotly.plot( TESTER, [{
+      x: [
 <c:forEach var="p" items="${model}">
-    ${p.x},
+      ${p.x},
 </c:forEach>
-    ],
-    y: [
+      ],
+      y: [
 <c:forEach var="p" items="${model}">
-    ${p.y},
+      ${p.y},
 </c:forEach>
-    ],
-    mode: 'markers', }], {
-    margin: { t: 0 } } );
+  ],
+  mode: 'markers', }], {
+  margin: { t: 0 } } );
 
 });
 

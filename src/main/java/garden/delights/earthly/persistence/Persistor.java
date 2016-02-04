@@ -73,7 +73,6 @@ public class Persistor implements Closeable {
 
     @Override
     public void close() throws IOException {
-        emf.close();
     }
 
     public List<Point> get() throws SQLException, IOException {

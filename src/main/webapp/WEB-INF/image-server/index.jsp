@@ -21,7 +21,7 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 <hr/>
 
-<h2>Clicks</h2>
+<h2><span id="clickcount"></span> clicks</h2>
 
 <div id="tester" style="width:100%;height:auto;"></div>
 
@@ -32,6 +32,8 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 <script type="text/javascript">
 
 $(document).ready(function() {
+  
+  $('#clickcount').text("${model.size()}");
 
   $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
     $('#title').text(data.title);

@@ -15,11 +15,13 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 <h1 id="title"></h1>
 
-<button type="button" class="btn btn-secondary btn-sm"><a id="image" href="#">image</a></button>
+<button type="button" class="btn btn-secondary btn-sm"><a id="image" href="#"><span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a></button>
 
 <button type="button" class="btn btn-secondary btn-sm"><a id="wikipedia" href="#">wikipedia article</a></button>
 
 <hr/>
+
+<h2>Clicks</h2>
 
 <div id="tester" style="width:100%;height:auto;"></div>
 
@@ -33,7 +35,9 @@ $(document).ready(function() {
 
   $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
     $('#title').text(data.title);
-    $('#image').attr("href", "<c:url value='/' />" + data.image);
+    $('#width').text(data.width);
+    $('#height').text(data.height);
+    $('#image').attr("href", Geppaequo.contextPath + data.image);
     $('#wikipedia').attr("href", data.wikipedia);
   });
   

@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.IIOImage;
@@ -31,12 +34,15 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import org.glassfish.jersey.server.mvc.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import garden.delights.earthly.model.Point;
+import garden.delights.earthly.persistence.Persistor;
 import garden.delights.earthly.randomizer.RectangleRandomizer;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
 import net.aequologica.neo.imageserver.config.ImageServerConfig;
@@ -61,6 +67,31 @@ public class ImagesResource {
         return this.threadSafeSource.getDim();
     }
 
+    @GET
+    @javax.ws.rs.Path("/points")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Point>getPoints(@Context javax.servlet.http.HttpServletRequest request) throws SQLException, IOException {
+        try (final Persistor p = new Persistor()) {
+            return p.get();
+        } finally {
+        }
+    }
+
+    @GET
+    @javax.ws.rs.Path("/points")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getPointsAsHtml()  {
+        List<Point> list = new ArrayList<>();
+        try (final Persistor p = new Persistor()) {
+            list = p.get();
+        } catch (SQLException | IOException e) {
+            list.add(new Point(-1L, -1L));
+        } finally {
+        }
+        return new Viewable("/index", list);
+    }
+
+    
     @GET
     @javax.ws.rs.Path("/reload")
     @Produces(MediaType.TEXT_PLAIN)
@@ -170,13 +201,24 @@ public class ImagesResource {
                 this.lock.readLock().unlock();
             }
             if (widthParam < ret.getWidth() && heightParam < ret.getHeight()) {
-                Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam);
+                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam);
                 
                 ret = this.source.getSubimage( 
                         rectangle.x.intValue(), 
                         rectangle.y.intValue(), 
                         rectangle.w.intValue(), 
                         rectangle.h.intValue());
+                
+                Runnable save2db = () -> { 
+                    try (final Persistor p = new Persistor()) {
+                        p.store(rectangle.x.longValue(), rectangle.x.longValue());
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                    }
+                };
+                 
+                // start the thread
+                new Thread(save2db).start();
             }
             return ret;
         }

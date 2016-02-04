@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" 
+  id="image-server" version="3.1">
+  
+    <display-name>image-server</display-name>
+
+    <servlet>
+        <servlet-name>jsp</servlet-name>
+        <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+        <init-param>
+            <param-name>fork</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>xpoweredBy</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>compilerSourceVM</param-name>
+            <param-value>1.8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>compilerTargetVM</param-name>
+            <param-value>1.8</param-value>
+        </init-param>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+
+    <login-config>
+        <auth-method>FORM</auth-method>
+    </login-config>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Protected Area</web-resource-name>
+            <url-pattern>/modules/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Everyone</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Protected Area</web-resource-name>
+            <url-pattern>/wizardry/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>wizard</role-name>
+            <role-name>BUILTIN\Administrators</role-name><!-- this is a Windows role - only here to enable testing with waffle -->
+        </auth-constraint>
+    </security-constraint>
+
+    <security-role>
+        <description>All SAP HANA Cloud Platform users</description>
+        <role-name>Everyone</role-name>
+    </security-role>
+
+    <security-role>
+        <description>admins</description>
+        <role-name>wizard</role-name>
+    </security-role>
+
+    <resource-ref>
+        <res-ref-name>EcmService</res-ref-name>
+        <res-type>com.sap.ecm.api.EcmService</res-type>
+    </resource-ref>
+
+    <resource-ref>
+        <res-ref-name>jdbc/DefaultDB</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+    </resource-ref>
+
+    <resource-ref>
+        <res-ref-name>mail/SAPInternalNWCloudSession</res-ref-name>
+        <res-type>javax.mail.Session</res-type>
+     </resource-ref>
+
+</web-app>

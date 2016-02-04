@@ -17,6 +17,8 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 <div id="tester" style="width:100%;height:auto;"></div>
 
+${model}
+
 </t:layout>
 
 <script type="text/javascript" charset="utf8" src="<c:url value='/${plotly_min_js}' />" ></script>

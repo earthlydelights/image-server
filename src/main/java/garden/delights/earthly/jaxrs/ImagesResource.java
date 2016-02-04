@@ -70,7 +70,7 @@ public class ImagesResource {
     @GET
     @javax.ws.rs.Path("/points")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Point>getPoints(@Context javax.servlet.http.HttpServletRequest request) throws SQLException, IOException {
+    public List<Point>getPoints() throws SQLException, IOException {
         try (final Persistor p = new Persistor()) {
             return p.get();
         } finally {
@@ -88,7 +88,7 @@ public class ImagesResource {
             list.add(new Point(-1L, -1L));
         } finally {
         }
-        return new Viewable("/index", list);
+        return new Viewable("/WEB-INF/image-server/index", list);
     }
 
     
@@ -211,7 +211,7 @@ public class ImagesResource {
                 
                 Runnable save2db = () -> { 
                     try (final Persistor p = new Persistor()) {
-                        p.store(rectangle.x.longValue(), rectangle.x.longValue());
+                        p.store(rectangle.x.longValue(), rectangle.y.longValue());
                     } catch (Exception e) {
                         log.error(e.getMessage());
                     }

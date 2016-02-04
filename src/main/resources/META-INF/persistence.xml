@@ -18,7 +18,7 @@
         <class>garden.delights.earthly.model.Point</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
-            <property name="javax.persistence.jdbc.url" value="jdbc:derby:/home/cthiebaud/databases/simpleDb;create=true" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:derby:/_/derby/databases/imageserverdb;create=true" />
             <property name="javax.persistence.jdbc.user" value="test" />
             <property name="javax.persistence.jdbc.password" value="test" />
 

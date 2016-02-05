@@ -220,8 +220,8 @@ public class ImagesResource {
                         rectangle.h.intValue());
                 
                 Runnable save2db = () -> { 
-                    try (final Persistor p = new Persistor()) {
-                        p.store(rectangle.x.longValue(), rectangle.y.longValue());
+                    try {
+                        persistor.store(rectangle.x.longValue(), rectangle.y.longValue());
                     } catch (Exception e) {
                         log.error(e.getMessage());
                     }

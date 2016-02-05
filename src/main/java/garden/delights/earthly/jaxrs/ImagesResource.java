@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -54,44 +53,13 @@ public class ImagesResource {
     private final static Logger log = LoggerFactory.getLogger(ImagesResource.class);
 
     final ThreadSafeBufferedImage threadSafeSource;
+    final Persistor               persistor;
     
     public ImagesResource() {
         this.threadSafeSource = new ThreadSafeBufferedImage();
+        this.persistor        = new Persistor();
     }
 
-    @GET
-    @javax.ws.rs.Path("/metadata")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Metadata metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
-        this.threadSafeSource.lazyLoadImage(request);
-        return this.threadSafeSource.getMetadata();
-    }
-
-    @GET
-    @javax.ws.rs.Path("/points")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Point>getPoints() throws SQLException, IOException {
-        try (final Persistor p = new Persistor()) {
-            return p.get();
-        } finally {
-        }
-    }
-
-    @GET
-    @javax.ws.rs.Path("/points")
-    @Produces(MediaType.TEXT_HTML)
-    public Viewable getPointsAsHtml()  {
-        List<Point> list = new ArrayList<>();
-        try (final Persistor p = new Persistor()) {
-            list = p.get();
-        } catch (SQLException | IOException e) {
-            list.add(new Point(-1L, -1L));
-        } finally {
-        }
-        return new Viewable("/WEB-INF/image-server/index", list);
-    }
-
-    
     @GET
     @javax.ws.rs.Path("/reload")
     @Produces(MediaType.TEXT_PLAIN)
@@ -100,6 +68,36 @@ public class ImagesResource {
         return Response.ok(Status.NO_CONTENT).build();
     }
     
+    @GET
+    @javax.ws.rs.Path("/points")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Point>getPoints() throws SQLException, IOException {
+        return persistor.get();
+    }
+
+    @GET
+    @javax.ws.rs.Path("/points")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getPointsAsHtml() throws SQLException, IOException  {
+        List<Point> list = persistor.get();
+        return new Viewable("/WEB-INF/image-server/index", list);
+    }
+
+    @GET
+    @javax.ws.rs.Path("/points/count")
+    @Produces(MediaType.TEXT_PLAIN)
+    public long getPointsCount() throws SQLException, IOException  {
+        return persistor.getCount();
+    }
+    
+    @GET
+    @javax.ws.rs.Path("/metadata")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Metadata metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
+        this.threadSafeSource.lazyLoadImage(request);
+        return this.threadSafeSource.getMetadata();
+    }
+
     @GET
     @javax.ws.rs.Path("/crop")
     @Produces("image/jpeg")

@@ -4,6 +4,7 @@ import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
@@ -12,7 +13,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "T_POINT")
-@NamedQuery(name = "AllPoints", query = "select p from Point p")
+@NamedQueries({
+    @NamedQuery(name  = "AllPoints", 
+                query = "SELECT p FROM Point p"),
+    @NamedQuery(name  = "PointsCount", 
+                query = "SELECT COUNT(p) FROM Point p"),
+}) 
 @JsonIgnoreProperties
 public class Point {
     

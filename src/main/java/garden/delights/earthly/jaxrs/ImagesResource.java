@@ -179,18 +179,22 @@ public class ImagesResource {
                 return;
             }
             
+            final ImageServerConfig config   = getConfig(ImageServerConfig.class);
+            final String            urlParam = config.getImage();
+            if (urlParam == null) {
+                throw new IllegalStateException("no image configured");
+            }
+            final String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
+            final URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
+
+            final BufferedImage image = ImageIO.read(url);
+            if (image == null) {
+                throw new IOException("cannot read image from " + url.toString());
+            }
+            
             this.lock.writeLock().lock();
             try {
-                ImageServerConfig config   = getConfig(ImageServerConfig.class);
-                String            urlParam = config.getImage();
-                if (urlParam == null) {
-                    throw new IllegalStateException("no image configured");
-                }
-                String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
-                URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
-
-                this.source = ImageIO.read(url);
-                
+                this.source = image;
                 this.metadata = new Metadata(
                         this.source.getWidth(), 
                         this.source.getHeight(),

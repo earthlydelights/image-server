@@ -23,6 +23,7 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -30,7 +31,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
@@ -69,11 +69,11 @@ public class ImagesResource {
         this.noCacheMaxAgeZeroMustRevalidateNoStore.setNoStore(true);
     }
 
-    @GET
+    @POST
     @javax.ws.rs.Path("/reload")
     public Response reload(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
         this.threadSafeSource.loadImage(request, true /* forces reload */);
-        return Response.ok(Status.NO_CONTENT).build();
+        return Response.noContent().build();
     }
     
     @GET
@@ -128,8 +128,10 @@ public class ImagesResource {
             quality = (float)qualityParam/100f;
         }
         
+        // get sub-image (will be full image if dimensions are larger)
         final BufferedImage croppedImage = this.threadSafeSource.getCroppedImage(widthParam, heightParam);
 
+        // prepare streaming
         StreamingOutput streamOut = new StreamingOutput() {
             @Override
             public void write(OutputStream os) throws IOException, WebApplicationException {
@@ -154,6 +156,8 @@ public class ImagesResource {
                 }
             }
         };
+        
+        // go
         return Response.ok(streamOut).cacheControl(noCacheMaxAgeZeroMustRevalidateNoStore).build();
     }
 

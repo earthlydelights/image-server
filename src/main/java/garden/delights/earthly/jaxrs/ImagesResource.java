@@ -5,6 +5,7 @@ import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
@@ -175,23 +176,46 @@ public class ImagesResource {
         }
         
         private void loadImage(HttpServletRequest request, boolean force) throws IOException {
+            // if there is already something and nobody asks me to change, do nothing 
             if (this.source != null && !force) {
                 return;
             }
             
+            // get url where to load image from 
             final ImageServerConfig config   = getConfig(ImageServerConfig.class);
             final String            urlParam = config.getImage();
-            if (urlParam == null) {
+            if (urlParam == null || urlParam.isEmpty()) {
                 throw new IllegalStateException("no image configured");
             }
-            final String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
-            final URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
 
-            final BufferedImage image = ImageIO.read(url);
+            // load image
+            final BufferedImage image;
+            {
+                InputStream inputStream = null;
+                try {
+                    // poor man's uri parser
+                    if (urlParam.startsWith("classpath:/")) { 
+                        final String path = urlParam.substring("classpath:/".length());
+                        inputStream = this.getClass().getResourceAsStream(path);
+                    } else { 
+                        // uri must be local to server
+                        // juggle with context / no context
+                        final String  applicationUrl  = request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
+                        final URL     url             = UriBuilder.fromUri(URI.create(applicationUrl)).path(urlParam).build().toURL();
+                        inputStream = url.openStream();
+                    }
+                    image = ImageIO.read(inputStream);
+                } finally {
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
+                }
+            }
             if (image == null) {
-                throw new IOException("cannot read image from " + url.toString());
+                throw new IOException("cannot read image from " + urlParam);
             }
             
+            // write image to class variable
             this.lock.writeLock().lock();
             try {
                 this.source = image;

@@ -46,16 +46,8 @@ $(document).ready(function() {
 
   TESTER = document.getElementById('tester');
   Plotly.plot( TESTER, [{
-      x: [
-<c:forEach var="p" items="${model}">
-      ${p.x},
-</c:forEach>
-      ],
-      y: [
-<c:forEach var="p" items="${model}">
-      ${p.y},
-</c:forEach>
-  ],
+      x: [<c:forEach var="p" items="${model}">${p.x},</c:forEach>],
+      y: [<c:forEach var="p" items="${model}">${p.y},</c:forEach>],
   mode: 'markers', }], {
   margin: { t: 0 } } );
 

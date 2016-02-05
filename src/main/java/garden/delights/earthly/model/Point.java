@@ -18,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
                 query = "SELECT p FROM Point p"),
     @NamedQuery(name  = "PointsCount", 
                 query = "SELECT COUNT(p) FROM Point p"),
+    @NamedQuery(name  = "DeleteAllPoints", 
+                query = "DELETE FROM Point"),
 }) 
 @JsonIgnoreProperties
 public class Point {

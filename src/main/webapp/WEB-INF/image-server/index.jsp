@@ -8,6 +8,9 @@ WebJarAssetLocator  LOCATOR                      = new WebJarAssetLocator();
 int                 META_INF_RESOUCE_PATH_LENGTH = "META-INF/resources/".length();
 
 %><%
+  Boolean isWizard = request.isUserInRole("wizard") || request.isUserInRole("BUILTIN\\Administrators");
+  request.setAttribute("isGeppaequoWizard", isWizard);
+%><%
 
 request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").substring(META_INF_RESOUCE_PATH_LENGTH) );
 
@@ -15,15 +18,19 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 <h1 id="title"></h1>
 
-<a id="image"     class="btn btn-secondary btn-sm" href="#" role="button"><span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
+<a id="image"     class="btn btn-secondary btn-lg" href="#" role="button">image <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
 
-<a id="wikipedia" class="btn btn-secondary btn-sm" href="#" role="button">wikipedia article</a>
+<a id="wikipedia" class="btn btn-secondary btn-lg" href="#" role="button">wikipedia article</a>
 
 <hr/>
 
 <h2><span id="clickcount"></span> clicks</h2>
 
 <div id="tester" style="width:100%;height:auto;"></div>
+
+<c:if test='${isGeppaequoWizard}' >
+<button id="reset" class="btn btn-secondary btn-sm btn-danger" style="float:right;">delete all clicks</button>
+</c:if>
 
 </t:layout>
 
@@ -42,14 +49,25 @@ $(document).ready(function() {
     $('#image').attr("href", "${pageContext.request.contextPath}" + data.image);
     $('#wikipedia').attr("href", data.wikipedia);
   });
-  
 
   TESTER = document.getElementById('tester');
   Plotly.plot( TESTER, [{
       x: [<c:forEach var="p" items="${model}">${p.x},</c:forEach>],
       y: [<c:forEach var="p" items="${model}">${p.y},</c:forEach>],
-  mode: 'markers', }], {
-  margin: { t: 0 } } );
+  mode: 'markers', }], 
+  { margin: { b: 50, l: 50, r: 0, t: 20 } },
+  { displayModeBar: false } );
+
+  $('#reset').on('click', function(){
+    $.post( "<c:url value='/earthly-delights-garden-api/image/v1/points/reset' />", function( data ) {
+      $('#clickcount').text("0");
+      TESTER.data = [{
+        x: [],
+        y: [],
+        mode: 'markers', }];
+      Plotly.redraw( TESTER );
+    });
+  });
 
 });
 

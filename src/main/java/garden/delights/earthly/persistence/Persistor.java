@@ -87,6 +87,20 @@ public class Persistor implements Closeable {
         }
     }
     
+    public int deleteAll() throws SQLException, IOException {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            int theNumberOfEntitiesDeleted = em.createNamedQuery("DeleteAllPoints").executeUpdate();
+            em.getTransaction().commit();
+            return theNumberOfEntitiesDeleted;
+        } finally {
+            em.close();
+        }
+    }
+
+    
+    
     static private EntityManagerFactory getEntityManagerFactory() {
 
         // try remote

@@ -99,6 +99,13 @@ public class ImagesResource {
         return persistor.getCount();
     }
     
+    @POST
+    @javax.ws.rs.Path("/points/reset")
+    @Produces(MediaType.TEXT_PLAIN)
+    public int deleteAllPoints() throws SQLException, IOException {
+        return persistor.deleteAll();
+    }
+    
     @GET
     @javax.ws.rs.Path("/metadata")
     @Produces(MediaType.APPLICATION_JSON)

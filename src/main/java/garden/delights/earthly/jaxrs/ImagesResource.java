@@ -71,7 +71,6 @@ public class ImagesResource {
 
     @GET
     @javax.ws.rs.Path("/reload")
-    @Produces(MediaType.TEXT_PLAIN)
     public Response reload(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
         this.threadSafeSource.loadImage(request, true /* forces reload */);
         return Response.ok(Status.NO_CONTENT).build();
@@ -221,16 +220,14 @@ public class ImagesResource {
                         rectangle.w.intValue(), 
                         rectangle.h.intValue());
                 
-                Runnable save2db = () -> { 
+                // write to DB in a thread
+                new Thread(() -> { 
                     try {
                         persistor.store(rectangle.x.longValue(), rectangle.y.longValue());
                     } catch (Exception e) {
                         log.error(e.getMessage());
                     }
-                };
-                 
-                // start the thread
-                new Thread(save2db).start();
+                }).start();
             }
             return ret;
         }

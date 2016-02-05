@@ -26,6 +26,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -146,7 +147,13 @@ public class ImagesResource {
                 }
             }
         };
-        return Response.ok(streamOut).build();
+        // Cache-Control: no-cache, max-age=0, must-revalidate, no-store
+        CacheControl control = new CacheControl();
+        control.setNoCache(true);
+        control.setMaxAge(0);
+        control.setMustRevalidate(true);
+        control.setNoStore(true);
+        return Response.ok(streamOut).cacheControl(control).build();
     }
 
     private class ThreadSafeBufferedImage {

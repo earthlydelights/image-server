@@ -55,10 +55,18 @@ public class ImagesResource {
 
     final ThreadSafeBufferedImage threadSafeSource;
     final Persistor               persistor;
+    final CacheControl            noCacheMaxAgeZeroMustRevalidateNoStore;
     
     public ImagesResource() {
         this.threadSafeSource = new ThreadSafeBufferedImage();
         this.persistor        = new Persistor();
+        
+        // Cache-Control: no-cache, max-age=0, must-revalidate, no-store
+        this.noCacheMaxAgeZeroMustRevalidateNoStore = new CacheControl();
+        this.noCacheMaxAgeZeroMustRevalidateNoStore.setNoCache(true);
+        this.noCacheMaxAgeZeroMustRevalidateNoStore.setMaxAge(0);
+        this.noCacheMaxAgeZeroMustRevalidateNoStore.setMustRevalidate(true);
+        this.noCacheMaxAgeZeroMustRevalidateNoStore.setNoStore(true);
     }
 
     @GET
@@ -147,13 +155,7 @@ public class ImagesResource {
                 }
             }
         };
-        // Cache-Control: no-cache, max-age=0, must-revalidate, no-store
-        CacheControl control = new CacheControl();
-        control.setNoCache(true);
-        control.setMaxAge(0);
-        control.setMustRevalidate(true);
-        control.setNoStore(true);
-        return Response.ok(streamOut).cacheControl(control).build();
+        return Response.ok(streamOut).cacheControl(noCacheMaxAgeZeroMustRevalidateNoStore).build();
     }
 
     private class ThreadSafeBufferedImage {

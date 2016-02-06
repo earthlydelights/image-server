@@ -45,6 +45,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import garden.delights.earthly.model.Point;
 import garden.delights.earthly.persistence.Persistor;
 import garden.delights.earthly.randomizer.RectangleRandomizer;
+import garden.delights.earthly.randomizer.RectangleRandomizer.Type;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
 import net.aequologica.neo.imageserver.config.ImageServerConfig;
 
@@ -57,10 +58,13 @@ public class ImagesResource {
     final ThreadSafeBufferedImage threadSafeSource;
     final Persistor               persistor;
     final CacheControl            noCacheMaxAgeZeroMustRevalidateNoStore;
+    final ImageServerConfig       config;
+
     
     public ImagesResource() {
         this.threadSafeSource = new ThreadSafeBufferedImage();
         this.persistor        = new Persistor();
+        this.config           = getConfig(ImageServerConfig.class);
         
         // Cache-Control: no-cache, max-age=0, must-revalidate, no-store
         this.noCacheMaxAgeZeroMustRevalidateNoStore = new CacheControl();
@@ -189,7 +193,6 @@ public class ImagesResource {
             }
             
             // get url where to load image from 
-            final ImageServerConfig config   = getConfig(ImageServerConfig.class);
             final String            urlParam = config.getImage();
             if (urlParam == null || urlParam.isEmpty()) {
                 throw new IllegalStateException("no image configured");
@@ -251,7 +254,9 @@ public class ImagesResource {
                 this.lock.readLock().unlock();
             }
             if (widthParam < ret.getWidth() && heightParam < ret.getHeight()) {
-                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam);
+                
+                
+                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam, config.getRandomizerType());
                 
                 ret = this.source.getSubimage( 
                         rectangle.x.intValue(), 
@@ -341,18 +346,23 @@ public class ImagesResource {
         
     }
     
-    static private Rectangle<Long> getCropRectangle(final int sourceWidth, final int sourceHeight, final int targetWidth, final int targetHeight) throws IOException {
+    static private Rectangle<Long> getCropRectangle(
+                final int sourceWidth, 
+                final int sourceHeight, 
+                final int targetWidth, 
+                final int targetHeight,
+                final RectangleRandomizer.Type type) throws IOException {
         int grid = 20;
         long W = sourceWidth/grid; 
         long H = sourceHeight/grid; 
         long w = targetWidth/grid;
         long h = targetHeight/grid; 
-        final RectangleRandomizer   randomizer  = new RectangleRandomizer(
+        final RectangleRandomizer randomizer  = new RectangleRandomizer(
                 W, 
                 H, 
                 w,
                 h, 
-                UNIFORM);
+                type);
         final Rectangle<Long> random = randomizer.getRandomRectangle();
         long x = random.x.longValue()*grid;
         long y = random.y.longValue()*grid;

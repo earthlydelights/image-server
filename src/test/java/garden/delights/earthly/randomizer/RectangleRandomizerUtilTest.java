@@ -2,6 +2,7 @@ package garden.delights.earthly.randomizer;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
@@ -15,6 +16,10 @@ import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
 
 public class RectangleRandomizerUtilTest {
 
+    @Test
+    public void testType() {
+        System.out.println(Arrays.toString(RectangleRandomizer.Type.values()));
+    }
     @Test
     public void testDichotomy() {
         @SuppressWarnings("unused")

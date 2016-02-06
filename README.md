@@ -16,7 +16,7 @@ image server instance at [p1630844092](https://imageserverp1630844092trial.hanat
 
 ---
 
-### Mark Rothko - Red and Orange
+### Test instance
 
 image server instance at [p1742770407](https://imageserverp1742770407trial.hanatrial.ondemand.com/earthly-delights-garden-api/image/v1/points)
 

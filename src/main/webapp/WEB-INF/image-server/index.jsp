@@ -26,7 +26,7 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 <h2><span id="clickcount"></span> clicks</h2>
 
-<div id="tester" style="width:100%;height:auto;"></div>
+<div id="thePlot" style="width:100%;height:auto;"></div>
 
 <c:if test='${isGeppaequoWizard}' >
 <button id="reset" class="btn btn-secondary btn-sm btn-danger" style="float:right;">delete all clicks</button>
@@ -50,22 +50,28 @@ $(document).ready(function() {
     $('#wikipedia').attr("href", data.wikipedia);
   });
 
-  TESTER = document.getElementById('tester');
-  Plotly.plot( TESTER, [{
-      x: [<c:forEach var="p" items="${model}">${p.x},</c:forEach>],
-      y: [<c:forEach var="p" items="${model}">${p.y},</c:forEach>],
-  mode: 'markers', }], 
-  { margin: { b: 50, l: 50, r: 0, t: 20 } },
-  { displayModeBar: false } );
+  var thePlot = document.getElementById('thePlot');
+  Plotly.plot( 
+    thePlot, 
+    [{ x    : [<c:forEach var="p" items="${model}">${p.x},</c:forEach>],
+       y    : [<c:forEach var="p" items="${model}">${p.y},</c:forEach>],
+       mode : 'markers' }], 
+    { margin: { b: 50, l: 50, r: 0, t: 20 } },
+    { displayModeBar: false } 
+  );
 
   $('#reset').on('click', function(){
-    $.post( "<c:url value='/earthly-delights-garden-api/image/v1/points/reset' />", function( data ) {
+    
+    $.ajax({
+      type : "DELETE",
+      url  : "<c:url value='/earthly-delights-garden-api/image/v1/points' />",
+    }).done(function( data ) {
       $('#clickcount').text("0");
-      TESTER.data = [{
+      thePlot.data = [{
         x: [],
         y: [],
         mode: 'markers', }];
-      Plotly.redraw( TESTER );
+      Plotly.redraw( thePlot );
     });
   });
 

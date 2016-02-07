@@ -1,6 +1,5 @@
 package garden.delights.earthly.jaxrs;
 
-import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.UNIFORM;
 import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
 
 import java.awt.image.BufferedImage;
@@ -22,6 +21,7 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -45,7 +45,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import garden.delights.earthly.model.Point;
 import garden.delights.earthly.persistence.Persistor;
 import garden.delights.earthly.randomizer.RectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizer.Type;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
 import net.aequologica.neo.imageserver.config.ImageServerConfig;
 
@@ -103,8 +102,8 @@ public class ImagesResource {
         return persistor.getCount();
     }
     
-    @POST
-    @javax.ws.rs.Path("/points/reset")
+    @DELETE
+    @javax.ws.rs.Path("/points")
     @Produces(MediaType.TEXT_PLAIN)
     public int deleteAllPoints() throws SQLException, IOException {
         return persistor.deleteAll();

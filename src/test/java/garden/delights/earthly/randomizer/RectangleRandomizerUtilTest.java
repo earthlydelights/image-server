@@ -7,9 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-import garden.delights.earthly.randomizer.RectangleRandomizer;
 import garden.delights.earthly.randomizer.Computer.Store;
-import garden.delights.earthly.randomizer.Computer.WeightIntegraleAndSegment;
 import garden.delights.earthly.randomizer.RectangleRandomizer.UniformRectangleRandomizer;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
@@ -39,35 +37,42 @@ public class RectangleRandomizerUtilTest {
         System.out.println( "  "+"size " + uniform.getSize()    );
         System.out.println( "v v v v v v v v v v v");
         */
-        double                      size         = uniform.getSize();
-        double                      weightedSize = uniform.getWeightedSize();
-        WeightIntegraleAndSegment[]  offsets      = store.getOffsetsJustForTesting();
+
+        double size     = uniform.getSize();
+        double[] offsets  = store.unauthorizedGetIntegralesJustForTesting();
 
         double[] values = new double[12];
         values[0] = 0.;
-        values[1] = weightedSize;
-        values[2] = weightedSize + 1.;
+        values[1] = 1.;
+        values[2] = 2.;
         for (int i = 3; i<values.length; i++) {
-            values[i] = ThreadLocalRandom.current().nextDouble()*(weightedSize);;
+            values[i] = ThreadLocalRandom.current().nextDouble();
         }
+        double[] integs = store.unauthorizedGetIntegralesJustForTesting();
         for (double search : values) {
+            System.out.println("-----------");
             // map uses dichotomy search in the background
             double actual = uniform.map(search); 
             
             // verify linear search is equal to dichotomical search
             boolean found = false;
             for (int expected=0; expected<offsets.length-1; expected++) {
-
-                if (offsets[expected].segment <= search && search < offsets[expected+1].segment) {
-                    assertEquals(""+offsets[expected]+" <= "+search +" < "+offsets[expected+1], expected, actual, 0.);
+                double low = integs[expected];
+                double high = integs[expected+1];
+                if (low <= search && search < high) {
+                    assertEquals(""+low+" <= "+search +" < "+high, expected, actual, 0.);
+                    System.out.println("found also " + low + " <= " +  search + " <= " + high);
                     found = true;
                     break;
                 }
+
             }
             if (!found) {
-                assertEquals("when not found, uniform.map returns the upper limit", size, actual, 0.);
+                System.out.println("when not found "+search+", uniform.map returns the upper limit " + actual);
+                assertEquals("["+search+"] when not found, uniform.map returns the upper limit", size, actual, 0.);
             }
         }
+
     }
 
     @Test

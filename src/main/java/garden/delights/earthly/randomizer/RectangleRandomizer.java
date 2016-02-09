@@ -67,12 +67,9 @@ public class RectangleRandomizer implements RectangleRandomizerInterface  {
 
         @Override
         public Rectangle<Long> getRandomRectangle() {
-            int r = (int)randomDouble();
-            if (r <= 0.) {
-                return new Rectangle<>(0L, 0L, 0L, 0L, a->(long)a);
-            }
-            Point<Long>      p    = pointFromIndex(r);
-            Rectangle<Long>  rect = new Rectangle<>(p, d);
+            final int              r    = (int)randomDouble();
+            final Point<Long>      p    = pointFromIndex(r);
+            final Rectangle<Long>  rect = new Rectangle<>(p, d);
             return rect;
         }
 
@@ -80,8 +77,7 @@ public class RectangleRandomizer implements RectangleRandomizerInterface  {
         abstract protected double map(final double d);
 
         protected Point<Long> pointFromIndex(final long index) {
-            Point<Long> p = computer.biggest.pointFromIndex(index);
-            return p;
+            return computer.biggest.pointFromIndex(index);
         }
 
         protected long indexFromPoint(final Point<Long> p) {
@@ -120,17 +116,13 @@ public class RectangleRandomizer implements RectangleRandomizerInterface  {
         @Override
         protected double randomDouble() {
             final double    r       = threadLocalRandom.nextDouble();
-            final double    size    = getWeightedSize();
+            final double    size    = computer.store.getSize();
             return map( r * size );
         }
 
         @Override
         protected double map(final double d) {
             return computer.store.map(d);
-        }
-
-        double getWeightedSize() {
-            return computer.store.getSize();
         }
 
     }

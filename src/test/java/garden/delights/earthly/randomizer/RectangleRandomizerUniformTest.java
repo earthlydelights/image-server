@@ -10,13 +10,8 @@ import org.junit.Test;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
 
-import garden.delights.earthly.randomizer.Computer;
-import garden.delights.earthly.randomizer.RectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizerInterface;
 import garden.delights.earthly.randomizer.Computer.Store;
-import garden.delights.earthly.randomizer.Computer.WeightIntegraleAndSegment;
 import garden.delights.earthly.randomizer.RectangleRandomizer.AbstractRectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizer.UniformRectangleRandomizer;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
@@ -78,14 +73,6 @@ public class RectangleRandomizerUniformTest {
         */
         
         theTest(D,d, weights);
-    }
-
-    @Test
-    public void test5x5() {
-        Dimension<Integer> D = new Dimension<>(5, 5, a->(int)a );
-        Dimension<Integer> d = new Dimension<>(2, 5, a->(int)a );
-        
-        theTest(D,d, null);
     }
 
     @Test
@@ -158,25 +145,23 @@ weightOfCrop small Dimension(5x5)
                 d.h, 
                 RectangleRandomizer.Type.UNIFORM);
 
-        final RectangleRandomizerInterface  rri         = randomizer.internal;
-        final AbstractRectangleRandomizer   ari         = (AbstractRectangleRandomizer)rri;
-        final Computer computer                         = randomizer.computer;
-        final UniformRectangleRandomizer    uniform     = (rri instanceof UniformRectangleRandomizer ? (UniformRectangleRandomizer)rri : null);
+        final AbstractRectangleRandomizer   ari         = (AbstractRectangleRandomizer)randomizer.internal;
+        final Computer                      computer    = randomizer.computer;
         final Store                         store       = (Store)computer.store;
 
         final long draws = 10000000L;
-        final double acceptable_variance_delta = .1;
 
         Multiset<Long> set = TreeMultiset.create(
             (x, y) -> Long.compare(x, y)
         );
         
         final long size = ari.getSize();
-        final long totalWeight = computer.getTotalWeight();
-        final double weightedSize = uniform.getWeightedSize();
+        System.out.println("store size " + store.getSize()); // will lazy load
+        final long totalWeight = store.unauthorizedGetTotalWeightJustForTesting();
+        double[] segments = store.unauthorizedGetIntegralesJustForTesting();
 
         System.out.println( "^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^");
-        System.out.println( "  "+rri.getClass().getSimpleName() );
+        System.out.println( "  "+ari.getClass().getSimpleName() );
         System.out.println( "  "+"D " + D.w + "x" + D.h );
         System.out.println( "  "+"d " + d.w + "x" + d.h );
         System.out.println( "  "+"computer big " + computer.big );
@@ -184,9 +169,11 @@ weightOfCrop small Dimension(5x5)
         System.out.println( "  "+"computer smallest " + computer.smallest );
         System.out.println( "  "+"computer biggest " + computer.biggest );
         System.out.println( "  "+"size " + size    );
-        System.out.println( "  "+"total weigth " + totalWeight    );
-        System.out.println( "  "+"weighted size " + weightedSize    );
+        System.out.println( "  "+"mean weigth " + (double)totalWeight / (segments.length-1)    );
+        System.out.println( "  "+"total weigth " + totalWeight);
         System.out.println( "v v v v v v v v v v v");
+        
+        assertEquals(weights.length+1, segments.length);
 
         for (int f = 0; f<draws; f++) {
             Rectangle<Long> random = randomizer.getRandomRectangle();
@@ -196,83 +183,77 @@ weightOfCrop small Dimension(5x5)
         }
         
         double  verif_draws = 0; 
-        long    verif_weights = 0; 
         
-        Variance variance = new Variance();
+        double acceptable_variance_delta = .0002;
         Variance variance_perceived = new Variance();
-        /*
-        {
-            WeightAndSegment[] offsets = store.getOffsetsJustForTesting();
-            long prev = 0;
-            for (int i=0; i<offsets.length ; i++) {
-                System.out.print(offsets[i].weight);
-                System.out.print(" ");
-                System.out.print(offsets[i].weight - prev);
-                prev = offsets[i].weight;
-                System.out.print(" ");
-                System.out.println(offsets[i].segment);
-            }
-        }
-        */
         
         for (long i= 0 ; i < size; i++) {
             Point<Long> p        = computer.biggest.pointFromIndex(i);
             int         count    = set.count(i);
             double      percent  = (double)count/draws;
-            
-            WeightIntegraleAndSegment wis     = store.get((int)i);
-            WeightIntegraleAndSegment nextWis = store.get((int)i+1);
-            long        weight          = wis.weight;
-            @SuppressWarnings("unused")
-            long        nextWeight      = nextWis.weight;
-            long        integrale       = wis.integrale;
-            long        nextIntegrale   = nextWis.integrale;
-            double      segment         = wis.segment;
-            double      nextSegment     = nextWis.segment;
-            
-            double      perceivedWeight = (double)weight*percent*size;
-            
-            variance.increment(percent);
-            variance_perceived.increment(perceivedWeight);
-            
-            if (count!= 0 && weights != null && i < weights.length) {
-                assertEquals("index "+i, weights[(int)i], weight, 0.);
-            }
-            
             verif_draws += percent;
-            verif_weights += weight;
+            double perceivedWeight = (percent)*weights[(int)i];
 
-            System.out.print(String.format("%2d -> %s  | %s %2d (%2d + %2d = %2d) %s (%s + %s = %s) |",
+            variance_perceived.increment((double)perceivedWeight);
+            
+            System.out.print(String.format("%2d -> %s | %s | %d x %s = %f -> %s § %s",
                     i, 
                     percentFormat.format(percent),
                     p,
-                    (int)weight,
-                    (int)integrale,
-                    (int)nextIntegrale-(int)integrale, 
-                    (int)nextIntegrale,
-                    percentFormat2.format((double)weight/totalWeight), 
-                    percentFormat2.format(segment),
-                    percentFormat2.format(nextSegment-segment),
-                    percentFormat2.format(nextSegment)));
-            System.out.print(String.format("%2.1f", perceivedWeight));
+                    weights[(int)i],
+                    percentFormat.format(percent),
+                    (percent)*weights[(int)i]*size,
+                    percentFormat.format(perceivedWeight),
+                    percentFormat.format(1./size)
+            ));
             System.out.println();
         }
         System.out.println(String.format("sum of %% draws is %s", percentFormat.format(verif_draws)));
-        System.out.println(String.format("total weight is %4d", totalWeight));
-        System.out.println(String.format("sum of weights is %4d", verif_weights));
-        System.out.println(String.format("sum of %% weights is %s", percentFormat.format((double)verif_weights/totalWeight)));
-        System.out.println(String.format("variance %f <? %f", variance.getResult(), acceptable_variance_delta));
         System.out.println(String.format("variance adjusted %f <? %f", variance_perceived.getResult(), acceptable_variance_delta));
 
-        if (weights != null && weights.length > 0) {
-            assertEquals("acceptable variance delta is "+acceptable_variance_delta, 0., variance_perceived.getResult(), acceptable_variance_delta);
-        }
+        assertEquals("acceptable variance delta is "+acceptable_variance_delta, 0., variance_perceived.getResult(), acceptable_variance_delta);
     }
-
+    
     public static void main(String [ ] args) {
         Dimension<Integer> D = new Dimension<>(5, 5, a->(int)a );
         Dimension<Integer> d = new Dimension<>(3, 3, a->(int)a );
-        RectangleRandomizerUniformTest.theTest(D,d, null);
+        int[] weights = new int[] {
+                25, 30, 25,
+                30, 36, 30,
+                25, 30, 25,
+        };
+        /*
+    multiply big Dimension(5x5) 
+        
+        x * y |     0       1       2       3       4
+        ──────┼─────────────────────────────────────────────
+            0 │     1       2       3       4       5
+            1 │     2       4       6       8      10
+            2 │     3       6       9      12      15
+            3 │     4       8      12      16      20
+            4 │     5      10      15      20      25
+    
+    mirror smallest Dimension(2x2) 
+    
+         frqs |     0       1       2       3       4
+        ──────┼─────────────────────────────────────────────
+            0 │     1       2       2       2       1
+            1 │     2       4       4       4       2
+            2 │     2       4       4       4       2
+            3 │     2       4       4       4       2
+            4 │     1       2       2       2       1
+    
+    
+    weightOfCrop small Dimension(3x3) 
+    
+        integ |     0       1       2  
+        ──────┼────────────────────────
+            0 │    25      30      25  
+            1 │    30      36      30  
+            2 │    25      30      25  
+    */
+        
+        RectangleRandomizerUniformTest.theTest(D, d, weights);
     }
     
 

@@ -22,7 +22,7 @@ public class Persistor implements Closeable {
     final private EntityManagerFactory emf;
     
     public Persistor() {
-        this.emf = getEntityManagerFactory("buildhubPersist");
+        this.emf = getEntityManagerFactory("image-server");
     }
 
     @Override

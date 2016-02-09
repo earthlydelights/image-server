@@ -11,8 +11,6 @@ import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-import net.aequologica.neo.geppaequo.config.ConfigRegistry;
-
 @ApplicationPath("earthly-delights-garden-api")
 public class Application extends ResourceConfig {
 

@@ -28,15 +28,8 @@ public class RectangleRandomizerUtilTest {
                 RectangleRandomizer.Type.UNIFORM);
         final UniformRectangleRandomizer uniform = (UniformRectangleRandomizer)randomizer.internal;
         final Store                      store   = (Store)randomizer.computer.store;
+
         store.lazyLoad();
-        /*
-        System.out.println( "^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^");
-        System.out.println( "  "+uniform.getClass().getSimpleName() );
-        System.out.println( "  "+"D " + Dw + "x" + Dh );
-        System.out.println( "  "+"d " + dw + "x" + dh );
-        System.out.println( "  "+"size " + uniform.getSize()    );
-        System.out.println( "v v v v v v v v v v v");
-        */
 
         double size     = uniform.getSize();
         double[] offsets  = store.unauthorizedGetIntegralesJustForTesting();

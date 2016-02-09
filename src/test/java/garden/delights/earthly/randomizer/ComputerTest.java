@@ -21,7 +21,7 @@ public class ComputerTest {
     public void test() throws IOException {
         Path path = null;
         if (System.getenv("HC_HOST") == null) {
-            boolean keepFile = false; // true; // 
+            final boolean keepFile = false; // true; // 
             final Path otherPath = Files.createTempFile("computer-test-", ".txt");
             path = otherPath;
             System.out.println("output of " + ComputerTest.class.getSimpleName() + " written to tmp file : " + path);
@@ -34,6 +34,8 @@ public class ComputerTest {
                         if (!keepFile) {
                             Files.delete(otherPath);
                             System.out.println("deleted file at " + otherPath);
+                        } else {
+                            System.out.println("NOT deleted file at " + otherPath);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -51,7 +53,7 @@ public class ComputerTest {
                 sysout = new PrintStream(fos);
             }
             
-            final long SQUARE = 5;
+            final long SQUARE = 12;
 
             int level = 1;
             for (long H = 5; H <= SQUARE; H++) {

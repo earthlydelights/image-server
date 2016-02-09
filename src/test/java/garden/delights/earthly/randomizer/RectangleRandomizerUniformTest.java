@@ -158,7 +158,7 @@ weightOfCrop small Dimension(5x5)
         final long size = ari.getSize();
         System.out.println("store size " + store.getSize()); // will lazy load
         final long totalWeight = store.unauthorizedGetTotalWeightJustForTesting();
-        double[] segments = store.unauthorizedGetIntegralesJustForTesting();
+        double[] segments = store.unauthorizedGetSegmentsJustForTesting();
 
         System.out.println( "^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^");
         System.out.println( "  "+ari.getClass().getSimpleName() );

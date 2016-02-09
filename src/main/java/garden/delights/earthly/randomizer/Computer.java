@@ -5,23 +5,25 @@ import java.util.EnumMap;
 import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
 
 /*
-╔═ big ═════════════════════════════╗     ^    │     ╔═ big ═════════════════════════════╗ ^   ^   
-║                     |             ║     |          ║  smallest   |                     ║ |   |   
-║                     |             ║     |    │     ║     ==      |                     ║ | β | δ 
-║                     |             ║     |          ║  biggest    |                     ║ v   |   
-║       biggest       |             ║     | δ  │     ║-------------┌─ small ─────────────╢     v   
-║                     |             ║     |          ║             │                     ║         
-║                     |             ║     |    │     ║             │                     ║         
-║                     |             ║     |          ║             │                     ║         
-║---------------------┌─ small ─────╢ ^   v    │     ║             │                     ║         
-║                     │             ║ |              ║             │                     ║         
-║                     │  smallest   ║ | β      │     ║             │                     ║         
-║                     │             ║ v              ║             │                     ║         
-╚═════════════════════╧═════════════╝          │     ╚═════════════╧═════════════════════╝         
-                      <------------>                 <------------>                                
-                            α                  │            α                                      
-<--------------------->                              <------------->                               
-          γ                                    │            γ                                      
+                                               |                                                   
+╔═ big ═════════════════════════════╗     ^    |     ╔═ big ═════════════════════════════╗ ^   ^   
+║                     |             ║     |    |     ║  smallest   |                     ║ |   |   
+║                     |             ║     |    |     ║    ~=       |                     ║ | β | δ 
+║                     |             ║     |    |     ║  biggest    |                     ║ v   |   
+║       biggest       |             ║     | δ  |     ║-------------┌─ small ─────────────╢     v   
+║                     |             ║     |    |     ║             │                     ║         
+║                     |             ║     |    |     ║             │                     ║         
+║                     |             ║     |    |     ║             │                     ║         
+║---------------------┌─ small ─────╢     v    |     ║             │                     ║         
+║                     │             ║ ^        |     ║             │                     ║         
+║                     │  smallest   ║ | β      |     ║             │                     ║         
+║                     │             ║ |        |     ║             │                     ║         
+╚═════════════════════╧═════════════╝ v        |     ╚═════════════╧═════════════════════╝         
+                       <------------>          |     <------------>                                
+                            α                  |            α                                      
+<--------------------->                        |     <------------->                               
+          γ                                    |            γ                                      
+                                               |                                                   
 */
 
 class Computer {
@@ -29,6 +31,7 @@ class Computer {
     final Dimension<Long>       small;
     final Dimension<Long>       smallest;
     final Dimension<Long>       biggest;
+    
     final EnumMap<Functions, F> operations;
     final MapInterface          store;
           
@@ -53,27 +56,38 @@ class Computer {
     interface F {
         long get(long x, long y);
     }
-    
+
+    //----------------------------------------------------------////////////////////////////////////////////////////////////////
     final F multiply = (a, b) -> (a + 1) * (b + 1);             //  multiply big = (5x5)                                        
                                                                 //                                                              
-    final F mirror = (x, y) -> {                                //      x * y |     0       1       2       3       4           
-        long a, b;                                              //      ──────┼─────────────────────────────────────────────    
+                                                                //      x * y |     0       1       2       3       4           
+                                                                //      ──────┼─────────────────────────────────────────────    
                                                                 //          0 │     1       2       3       4       5           
-        if (x < this.smallest.w) {                              //          1 │     2       4       6       8      10           
-            a = x;                                              //          2 │     3       6       9      12      15           
-        } else if (this.big.w - this.smallest.w - 1 < x) {      //          3 │     4       8      12      16      20           
-            a = this.big.w - x - 1;                             //          4 │     5      10      15      20      25           
-        } else {                                                //                                                              
-            a = this.smallest.w - 1;                            //  mirror smallest = (2x2)                                        
-        }                                                       //                                                              
-                                                                //       frqs |     0       1       2       3       4           
-        if (y < this.smallest.h) {                              //      ──────┼─────────────────────────────────────────────    
-            b = y;                                              //          0 │     1       2       2       2       1           
-        } else if (this.big.h - this.smallest.h - 1 < y) {      //          1 │     2       4       4       4       2           
-            b = this.big.h - y - 1;                             //          2 │     2       4       4       4       2           
-        } else {                                                //          3 │     2       4       4       4       2           
-            b = this.smallest.h - 1;                            //          4 │     1       2       2       2       1           
-        }                                                       //                                                              
+                                                                //          1 │     2       4       6       8      10           
+                                                                //          2 │     3       6       9      12      15           
+                                                                //          3 │     4       8      12      16      20           
+                                                                //          4 │     5      10      15      20      25           
+                                                                //                                                              
+
+    //----------------------------------------------------------///////////////////////////////////////////////////////////////
+    final F mirror = (x, y) -> {                                //  mirror smallest = (2x2)                                    
+        long a, b;                                              //                                                             
+                                                                //       frqs |     0       1       2       3       4          
+        if (x < this.smallest.w) {                              //      ──────┼─────────────────────────────────────────────   
+            a = x;                                              //          0 │     1       2       2       2       1          
+        } else if (this.big.w - this.smallest.w - 1 < x) {      //          1 │     2       4       4       4       2          
+            a = this.big.w - x - 1;                             //          2 │     2       4       4       4       2          
+        } else {                                                //          3 │     2       4       4       4       2          
+            a = this.smallest.w - 1;                            //          4 │     1       2       2       2       1          
+        }
+
+        if (y < this.smallest.h) {
+            b = y;
+        } else if (this.big.h - this.smallest.h - 1 < y) {
+            b = this.big.h - y - 1;
+        } else {
+            b = this.smallest.h - 1;
+        }
         if (a < 0) {
             a = 0;
         }
@@ -84,11 +98,12 @@ class Computer {
         return multiply.get(a, b);
     };
                                     
+    //----------------------------------------------------------/////////////////////////////////////////////////////
     final F weightOfCrop = (a, b) -> {                          //  weightOfCrop  = crop 2x2                         
         long ret = 0L;                                          //                                                   
-        for (long i=a; i<a+this.small.w; i++) {                 //        weight |     0       1       2       3     
-            for (long j=b; j<b+this.small.h; j++) {             //         ──────┼─────────────────────────────────  
-                ret += mirror.get(i, j);                        //             0 │     9      12      12       9     
+        for (long i=0; i < this.small.w; i++) {                 //        weight |     0       1       2       3     
+            for (long j=0; j < this.small.h; j++) {             //         ──────┼─────────────────────────────────  
+                ret += mirror.get(a + i, b + j);                //             0 │     9      12      12       9     
             }                                                   //             1 │    12      16      16      12     
         }                                                       //             2 │    12      16      16      12     
         return ret;                                             //             3 │     9      12      12       9     
@@ -123,7 +138,7 @@ class Computer {
                 
                 this.segments = new double[length + 1];
                 
-                // 1st iteration : calc total weight & temp store of each weight in segment array (BAD, I know) 
+                // 1st iteration : calculate total weight & store temporarily each weight in segment array (a bit of a hack, agreed) 
                 {
                     int index = 0;
                     for (long j=0; j<biggest.h; j++) {
@@ -136,13 +151,13 @@ class Computer {
                     }
                 }
                 
-                // 2nd iteration : calc segments as a function of weight and totalWeight 
-                this.segments[length] = 0; // last segment stores the total of segments
-                double weight_of_previous_index = this.segments[0]; 
+                // 2nd iteration : calculate segments as a function of totalWeight and weight (saved during 1st iteration above, and irremediably lost after 2nd iteration below)
+                this.segments[length] = 0; // last segment stores the ... err ... last segment
+                double weight_of_previous_segment = this.segments[0];  // hack
                 for (int i = 1; i <= length; i++) {
-                    double weight = this.segments[i];
-                    this.segments[i] = this.segments[length] += (double)totalWeight / weight_of_previous_index; 
-                    weight_of_previous_index = weight;
+                    final double weight = this.segments[i];
+                    this.segments[i] = this.segments[length] += (double)this.totalWeight / weight_of_previous_segment; 
+                    weight_of_previous_segment = weight;
                 }
                 this.segments[0] = 0.;
             }
@@ -182,11 +197,11 @@ class Computer {
             return ret;
         }
 
-        void unauthorizedSetIntegraleJustForTesting(int index, long integrale) {
-            this.segments[index] = integrale;
+        void unauthorizedSetSegmentJustForTesting(int index, long segment) {
+            this.segments[index] = segment;
         }
         
-        double[] unauthorizedGetIntegralesJustForTesting() {
+        double[] unauthorizedGetSegmentsJustForTesting() {
             return this.segments;
         }
         

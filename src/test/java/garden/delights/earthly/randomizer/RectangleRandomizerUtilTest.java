@@ -32,7 +32,7 @@ public class RectangleRandomizerUtilTest {
         store.lazyLoad();
 
         double size     = uniform.getSize();
-        double[] offsets  = store.unauthorizedGetIntegralesJustForTesting();
+        double[] offsets  = store.unauthorizedGetSegmentsJustForTesting();
 
         double[] values = new double[12];
         values[0] = 0.;
@@ -41,7 +41,7 @@ public class RectangleRandomizerUtilTest {
         for (int i = 3; i<values.length; i++) {
             values[i] = ThreadLocalRandom.current().nextDouble();
         }
-        double[] integs = store.unauthorizedGetIntegralesJustForTesting();
+        double[] integs = store.unauthorizedGetSegmentsJustForTesting();
         for (double search : values) {
             System.out.println("-----------");
             // map uses dichotomy search in the background

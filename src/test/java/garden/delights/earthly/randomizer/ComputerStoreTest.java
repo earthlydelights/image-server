@@ -166,11 +166,11 @@ public class ComputerStoreTest {
 
         long weight = 0;
         store.lazyLoad();
-        for (int index = 0; index < store.unauthorizedGetIntegralesJustForTesting().length; index++) {
+        for (int index = 0; index < store.unauthorizedGetSegmentsJustForTesting().length; index++) {
             weight = (long)Math.pow(2., (double)index);
-            store.unauthorizedSetIntegraleJustForTesting((int)index, weight);
+            store.unauthorizedSetSegmentJustForTesting((int)index, weight);
         }
-        return store.unauthorizedGetIntegralesJustForTesting();
+        return store.unauthorizedGetSegmentsJustForTesting();
     }
 
 }

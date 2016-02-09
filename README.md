@@ -22,4 +22,8 @@ image server instance at [p1742770407](https://imageserverp1742770407trial.hanat
 
 [<img src="https://imageserverp1742770407trial.hanatrial.ondemand.com/earthly-delights-garden-api/image/v1/crop?width=324&height=200&quality=100" width="324" height="200">](http://earthlydelights.garden/rouge.html)
 
+---
+
+manage instances at [HCP cockpit](https://account.hanatrial.ondemand.com/)
+
 

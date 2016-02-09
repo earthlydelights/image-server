@@ -23,17 +23,6 @@ public class Persistor implements Closeable {
     
     public Persistor() {
         this.emf = getEntityManagerFactory("buildhubPersist");
-        
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     @Override

@@ -1,4 +1,4 @@
-package garden.delights.earthly.persistence;
+package garden.delights.earthly.imageserver.persistence;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -17,8 +17,6 @@ import javax.sql.DataSource;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import garden.delights.earthly.model.Point;
 
 public class Persistor implements Closeable {
 

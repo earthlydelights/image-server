@@ -1,4 +1,4 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,10 +7,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Test;
 
-import garden.delights.earthly.randomizer.Computer.Store;
-import garden.delights.earthly.randomizer.RectangleRandomizer.UniformRectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.Computer.Store;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer.UniformRectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Dimension;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Point;
 
 public class RectangleRandomizerUtilTest {
 

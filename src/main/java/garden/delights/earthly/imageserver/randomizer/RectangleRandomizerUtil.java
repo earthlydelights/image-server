@@ -1,4 +1,4 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 public class RectangleRandomizerUtil {
 

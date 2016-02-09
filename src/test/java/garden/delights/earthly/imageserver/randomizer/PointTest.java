@@ -1,10 +1,10 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Point;
 
 public class PointTest {
 

@@ -1,4 +1,4 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,7 +13,8 @@ import org.junit.Test;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
 
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
+import garden.delights.earthly.imageserver.randomizer.Computer;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Dimension;
 
 public class ComputerTest {
 

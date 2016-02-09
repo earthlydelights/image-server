@@ -1,16 +1,16 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
-import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.BASIC;
-import static garden.delights.earthly.randomizer.RectangleRandomizer.Type.UNIFORM;
+import static garden.delights.earthly.imageserver.randomizer.RectangleRandomizer.Type.BASIC;
+import static garden.delights.earthly.imageserver.randomizer.RectangleRandomizer.Type.UNIFORM;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Dimension;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Point;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Rectangle;
 
 public class RectangleRandomizer implements RectangleRandomizerInterface  {
 

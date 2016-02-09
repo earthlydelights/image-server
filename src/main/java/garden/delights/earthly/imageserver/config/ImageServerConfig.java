@@ -1,12 +1,12 @@
-package net.aequologica.neo.imageserver.config;
+package garden.delights.earthly.imageserver.config;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.weakref.jmx.Managed;
 
-import garden.delights.earthly.randomizer.RectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizer.Type;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer.Type;
 import net.aequologica.neo.geppaequo.config.AbstractConfig;
 import net.aequologica.neo.geppaequo.config.Config;
 

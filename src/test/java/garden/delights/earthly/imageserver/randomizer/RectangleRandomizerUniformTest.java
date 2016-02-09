@@ -1,4 +1,4 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,11 +10,13 @@ import org.junit.Test;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.TreeMultiset;
 
-import garden.delights.earthly.randomizer.Computer.Store;
-import garden.delights.earthly.randomizer.RectangleRandomizer.AbstractRectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Point;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
+import garden.delights.earthly.imageserver.randomizer.Computer;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.Computer.Store;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer.AbstractRectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Dimension;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Point;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Rectangle;
 
 public class RectangleRandomizerUniformTest {
 

@@ -1,8 +1,8 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 import java.util.EnumMap;
 
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Dimension;
 
 /*
                                                |                                                   

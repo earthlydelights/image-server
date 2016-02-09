@@ -16,11 +16,11 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 %><t:layout module="image-server">
 
-<h1 id="title"></h1>
+<h1><span id="title"></span></h1>
 
-<a id="image"     class="btn btn-secondary btn-lg" href="#" role="button">image <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
-
-<a id="wikipedia" class="btn btn-secondary btn-lg" href="#" role="button">wikipedia article</a>
+<a id="reload"    class="btn btn-secondary btn-sm" href="#" role="button" title="reload page (F5)"        ><img src="<c:url value='/assets/images/animated_orange_refresh_22.gif'/>"></a>
+<a id="wikipedia" class="btn btn-secondary btn-sm" href="#" role="button" title="read wikipedia article"  ><i class="fa fa-wikipedia-w"></i></a>
+<a id="image"     class="btn btn-secondary btn-sm" href="#" role="button" title="display image"           ><i class="fa fa-picture-o"></i> <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
 
 <hr/>
 
@@ -43,11 +43,12 @@ $(document).ready(function() {
   $('#clickcount').text("${model.size()}");
 
   $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
-    $('#title').text(data.title);
+    $('#title').empty().text(data.title);
     $('#width').text(data.width);
     $('#height').text(data.height);
     $('#image').attr("href", "${pageContext.request.contextPath}" + data.image);
     $('#wikipedia').attr("href", data.wikipedia);
+    $('#reload img').attr("src", "<c:url value='/assets/images/animated_orange_refresh_22.png'/>");
   });
 
   var thePlot = document.getElementById('thePlot');
@@ -59,6 +60,10 @@ $(document).ready(function() {
     { margin: { b: 50, l: 50, r: 0, t: 20 } },
     { displayModeBar: false } 
   );
+
+  $('#reload').on('click', function(){
+    location.reload();
+  });
 
   $('#reset').on('click', function(){
     

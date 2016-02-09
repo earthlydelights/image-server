@@ -1,10 +1,11 @@
-package garden.delights.earthly.randomizer;
+package garden.delights.earthly.imageserver.randomizer;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import garden.delights.earthly.randomizer.Computer.Store;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Dimension;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.Computer.Store;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Dimension;
 
 public class ComputerStoreTest {
 

@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
     <persistence-unit name="image-server" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <class>garden.delights.earthly.model.Point</class>
+        <class>garden.delights.earthly.imageserver.persistence.Point</class>
         <properties>
             <property name="eclipselink.ddl-generation" value="create-or-extend-tables" />
             <property name="eclipselink.logging.level" value="FINE" />
@@ -15,7 +15,7 @@
 
     <persistence-unit name="image-server-local" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <class>garden.delights.earthly.model.Point</class>
+        <class>garden.delights.earthly.imageserver.persistence.Point</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver" />
             <property name="javax.persistence.jdbc.url" value="jdbc:derby:/_/derby/databases/imageserverdb;create=true" />

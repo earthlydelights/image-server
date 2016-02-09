@@ -1,4 +1,4 @@
-package garden.delights.earthly.jaxrs;
+package garden.delights.earthly.imageserver.jaxrs;
 
 import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
 
@@ -42,11 +42,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import garden.delights.earthly.model.Point;
-import garden.delights.earthly.persistence.Persistor;
-import garden.delights.earthly.randomizer.RectangleRandomizer;
-import garden.delights.earthly.randomizer.RectangleRandomizerUtil.Rectangle;
-import net.aequologica.neo.imageserver.config.ImageServerConfig;
+import garden.delights.earthly.imageserver.config.ImageServerConfig;
+import garden.delights.earthly.imageserver.persistence.Persistor;
+import garden.delights.earthly.imageserver.persistence.Point;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer;
+import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Rectangle;
 
 @Singleton
 @javax.ws.rs.Path("/image/v1")

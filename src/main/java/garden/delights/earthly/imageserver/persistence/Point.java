@@ -1,4 +1,4 @@
-package garden.delights.earthly.model;
+package garden.delights.earthly.imageserver.persistence;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;

@@ -18,7 +18,7 @@ public class Application extends ResourceConfig {
 
     public Application() {
 
-        scanConfigs(new String[] {"net.aequologica.neo.imageserver.config"});
+        scanConfigs(new String[] {"garden.delights.earthly.imageserver.config"});
         
         register(LoggingFilter.class);
         register(JspMvcFeature.class);

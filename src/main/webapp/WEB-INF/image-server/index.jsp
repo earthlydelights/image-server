@@ -1,19 +1,10 @@
-<%@page import="org.webjars.WebJarAssetLocator"
+<%@page import="net.aequologica.neo.geppaequo.webjars.WebJar"
 %><%@page contentType="text/html" pageEncoding="UTF-8"
 %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"
 %><%@ taglib prefix="t" uri="http://net.aequologica.neo/jsp/jstl/layout"
-%><%!
-
-WebJarAssetLocator  LOCATOR                      = new WebJarAssetLocator();
-int                 META_INF_RESOUCE_PATH_LENGTH = "META-INF/resources/".length();
-
 %><%
   Boolean isWizard = request.isUserInRole("wizard") || request.isUserInRole("BUILTIN\\Administrators");
   request.setAttribute("isGeppaequoWizard", isWizard);
-%><%
-
-request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").substring(META_INF_RESOUCE_PATH_LENGTH) );
-
 %><t:layout module="image-server">
 
 <h1><span id="title"></span></h1>
@@ -34,7 +25,7 @@ request.setAttribute("plotly_min_js", LOCATOR.getFullPath("plotly.min.js").subst
 
 </t:layout>
 
-<script type="text/javascript" charset="utf8" src="<c:url value='/${plotly_min_js}' />" ></script>
+<script type="text/javascript" charset="utf8" src="<c:url value='<%=WebJar.locate("plotly.min.js") %>' />" ></script>
 
 <script type="text/javascript">
 

@@ -54,11 +54,11 @@ public class ImagesResource {
 
     private final static Logger log = LoggerFactory.getLogger(ImagesResource.class);
 
-    final ThreadSafeBufferedImage threadSafeSource;
-    final Persistor               persistor;
-    final CacheControl            noCacheMaxAgeZeroMustRevalidateNoStore;
-    final ImageServerConfig       config;
+    final private ThreadSafeBufferedImage threadSafeSource;
+    final private Persistor               persistor;
+    final private CacheControl            noCacheMaxAgeZeroMustRevalidateNoStore;
 
+    private ImageServerConfig config;
     
     public ImagesResource() {
         this.threadSafeSource = new ThreadSafeBufferedImage();
@@ -191,8 +191,11 @@ public class ImagesResource {
                 return;
             }
             
+            // reload config
+            ImagesResource.this.config.reload();
+            
             // get url where to load image from 
-            final String            urlParam = config.getImage();
+            final String            urlParam = ImagesResource.this.config.getImage();
             if (urlParam == null || urlParam.isEmpty()) {
                 throw new IllegalStateException("no image configured");
             }
@@ -231,9 +234,9 @@ public class ImagesResource {
                 this.metadata = new Metadata(
                         this.source.getWidth(), 
                         this.source.getHeight(),
-                        config.getTitle(), 
-                        config.getImage(), 
-                        config.getWikipedia());
+                        ImagesResource.this.config.getTitle(), 
+                        ImagesResource.this.config.getImage(), 
+                        ImagesResource.this.config.getWikipedia());
 
             } finally {
                 this.lock.writeLock().unlock();
@@ -255,7 +258,7 @@ public class ImagesResource {
             if (widthParam < ret.getWidth() && heightParam < ret.getHeight()) {
                 
                 
-                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam, config.getRandomizerType());
+                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam, ImagesResource.this.config.getRandomizerType());
                 
                 ret = this.source.getSubimage( 
                         rectangle.x.intValue(), 

@@ -32,7 +32,7 @@ class Computer {
     final Dimension<Long>       smallest;
     final Dimension<Long>       biggest;
     
-    final EnumMap<Functions, F> operations;
+    final EnumMap<Function, F> operations;
     final MapInterface          store;
           
     Computer(Dimension<Long> big, Dimension<Long> small) {
@@ -44,12 +44,12 @@ class Computer {
         final long γ        = this.small.w <= 0 ? 0L : 1 + (this.big.w - this.small.w);
         final long δ        = this.small.h <= 0 ? 0L : 1 + (this.big.h - this.small.h);
         this.biggest        = new Dimension<Long>(γ, δ, a->(long)a); 
-        this.operations     = new EnumMap<Computer.Functions, Computer.F>(Computer.Functions.class);
+        this.operations     = new EnumMap<Computer.Function, Computer.F>(Computer.Function.class);
         this.store          = new Store();
         
-        operations.put(Functions.MULTIPLY,          multiply);
-        operations.put(Functions.MIRROR,            mirror);
-        operations.put(Functions.WEIGHT_OF_CROP,    weightOfCrop);
+        operations.put(Function.MULTIPLY,          multiply);
+        operations.put(Function.MIRROR,            mirror);
+        operations.put(Function.WEIGHT_OF_CROP,    weightOfCrop);
     }
 
     @FunctionalInterface
@@ -110,16 +110,17 @@ class Computer {
     };                                                          //                                                   
     
 
-    enum Functions {
+    enum Function {
         MULTIPLY("x * y"), MIRROR("frqs"), WEIGHT_OF_CROP("crop");
         final String desc;
-        Functions(String desc) {
+        Function(String desc) {
             this.desc = desc;
         }
     };
     
     interface MapInterface {
         double getSize();
+        long   getAdjustedWeight(int i);
         double map(double d);
     }
     
@@ -195,6 +196,18 @@ class Computer {
                 middle = (first + last)/2;
             }
             return ret;
+        }
+
+        @Override
+        public long getAdjustedWeight( int i ) {
+            return (long)Math.round((double)this.totalWeight * getAdjustment(i));
+        }
+
+        double getAdjustment( int i ) {
+            if (i<segments.length-1) {
+                return ( segments[i+1] - segments[i] ) / segments[segments.length-1]; 
+            }
+            return 0.;
         }
 
         void unauthorizedSetSegmentJustForTesting(int index, long segment) {

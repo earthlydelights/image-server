@@ -141,7 +141,7 @@ public class ImagesResource {
     @GET
     @javax.ws.rs.Path("/metadata")
     @Produces(MediaType.APPLICATION_JSON)
-    public Metadata metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
+    public ThreadSafeBufferedImage.Metadata metadata(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
         this.threadSafeSource.lazyLoadImage(request);
         return this.threadSafeSource.getMetadata();
     }
@@ -226,9 +226,6 @@ public class ImagesResource {
                 return this.metadata;
             }
             
-            // reload config
-            this.config.reload();
-            
             // get url where to load image from 
             final String            urlParam = this.config.getImage();
             if (urlParam == null || urlParam.isEmpty()) {
@@ -271,9 +268,6 @@ public class ImagesResource {
                 this.metadata = new Metadata(
                         this.source.getWidth(), 
                         this.source.getHeight(),
-                        this.config.getTitle(), 
-                        this.config.getImage(),
-                        this.config.getWikipedia(),
                         bytes);
                 return this.metadata;
             } finally {
@@ -315,87 +309,73 @@ public class ImagesResource {
             }
             return ret;
         }
+        
+        @JsonIgnoreProperties
+        public class Metadata {
+
+            @JsonProperty
+            private long width;
+            @JsonProperty
+            private long height;
+            @JsonProperty
+            private String title;
+            @JsonProperty
+            private String wikipedia;
+            @JsonProperty
+            private String image;
+            @JsonProperty
+            private int bytes;
+            
+            public Metadata() {
+                super();
+            }
+
+            public Metadata(long width, long height, int bytes) {
+                super();
+                this.width = width;
+                this.height = height;
+                this.bytes = bytes;
+            }
+
+            public long getWidth() {
+                return width;
+            }
+            
+            public void setWidth(long width) {
+                this.width = width;
+            }
+            
+            public long getHeight() {
+                return height;
+            }
+            
+            public void setHeight(long height) {
+                this.height = height;
+            }
+
+            public int getBytes() {
+                return bytes;
+            }
+
+            public void setBytes(int bytes) {
+                this.bytes = bytes;
+            }
+
+            public String getTitle() {
+                return ThreadSafeBufferedImage.this.config.getTitle();
+            }
+
+            public String getImage() {
+                return ThreadSafeBufferedImage.this.config.getImage();
+            }
+
+            public String getWikipedia() {
+                return ThreadSafeBufferedImage.this.config.getWikipedia();
+            }
+            
+        }
     }
     
-    @JsonIgnoreProperties
-    public static class Metadata {
-
-        @JsonProperty
-        private long width;
-        @JsonProperty
-        private long height;
-        @JsonProperty
-        private String title;
-        @JsonProperty
-        private String wikipedia;
-        @JsonProperty
-        private String image;
-        @JsonProperty
-        private int bytes;
-        
-        public Metadata() {
-            super();
-        }
-
-        public Metadata(long width, long height, String title, String image, String wikipedia, int bytes) {
-            super();
-            this.width = width;
-            this.height = height;
-            this.title = title;
-            this.image = image;
-            this.bytes = bytes;
-            this.wikipedia = wikipedia;
-        }
-
-        public long getWidth() {
-            return width;
-        }
-        
-        public void setWidth(long width) {
-            this.width = width;
-        }
-        
-        public long getHeight() {
-            return height;
-        }
-        
-        public void setHeight(long height) {
-            this.height = height;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public String getImage() {
-            return image;
-        }
-
-        public void setImage(String image) {
-            this.image = image;
-        }
-
-        public int getBytes() {
-            return bytes;
-        }
-
-        public void setBytes(int bytes) {
-            this.bytes = bytes;
-        }
-
-        public String getWikipedia() {
-            return wikipedia;
-        }
-
-        public void setWikipedia(String wikipedia) {
-            this.wikipedia = wikipedia;
-        }
-        
-    }
     
     static private Rectangle<Long> getCropRectangle(
                 final int sourceWidth, 

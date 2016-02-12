@@ -1,7 +1,5 @@
 package garden.delights.earthly.imageserver.jaxrs;
 
-import static net.aequologica.neo.geppaequo.config.ConfigRegistry.scanConfigs;
-
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.filter.LoggingFilter;
@@ -16,8 +14,6 @@ public class Application extends ResourceConfig {
 
     public Application() {
 
-        scanConfigs(new String[] {"garden.delights.earthly.imageserver.config"});
-        
         register(LoggingFilter.class);
         register(JspMvcFeature.class);
         register(MultiPartFeature.class);

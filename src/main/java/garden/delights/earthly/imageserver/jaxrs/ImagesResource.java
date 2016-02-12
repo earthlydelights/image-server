@@ -3,6 +3,7 @@ package garden.delights.earthly.imageserver.jaxrs;
 import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -256,12 +257,15 @@ public class ImagesResource {
             this.lock.writeLock().lock();
             try {
                 this.source = image;
+                DataBuffer buff = image.getRaster().getDataBuffer();
+                int bytes = buff.getSize() * DataBuffer.getDataTypeSize(buff.getDataType()) / 8;                
                 this.metadata = new Metadata(
                         this.source.getWidth(), 
                         this.source.getHeight(),
                         ImagesResource.this.config.getTitle(), 
-                        ImagesResource.this.config.getImage(), 
-                        ImagesResource.this.config.getWikipedia());
+                        ImagesResource.this.config.getImage(),
+                        ImagesResource.this.config.getWikipedia(),
+                        bytes);
 
             } finally {
                 this.lock.writeLock().unlock();
@@ -317,17 +321,20 @@ public class ImagesResource {
         private String wikipedia;
         @JsonProperty
         private String image;
+        @JsonProperty
+        private int bytes;
         
         public Metadata() {
             super();
         }
 
-        public Metadata(long width, long height, String title, String image, String wikipedia) {
+        public Metadata(long width, long height, String title, String image, String wikipedia, int bytes) {
             super();
             this.width = width;
             this.height = height;
             this.title = title;
             this.image = image;
+            this.bytes = bytes;
             this.wikipedia = wikipedia;
         }
 
@@ -361,6 +368,14 @@ public class ImagesResource {
 
         public void setImage(String image) {
             this.image = image;
+        }
+
+        public int getBytes() {
+            return bytes;
+        }
+
+        public void setBytes(int bytes) {
+            this.bytes = bytes;
         }
 
         public String getWikipedia() {

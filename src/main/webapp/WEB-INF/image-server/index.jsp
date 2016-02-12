@@ -11,7 +11,7 @@
 
 <a id="reload"    class="btn btn-secondary btn-sm" href="#" role="button" title="reload page (F5)"        ><img src="<c:url value='/assets/images/animated_orange_refresh_22.gif'/>"></a>
 <a id="wikipedia" class="btn btn-secondary btn-sm" href="#" role="button" title="read wikipedia article"  ><i class="fa fa-wikipedia-w"></i></a>
-<a id="image"     class="btn btn-secondary btn-sm" href="#" role="button" title="display image"           ><i class="fa fa-picture-o"></i> <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
+<a id="image"     class="btn btn-secondary btn-sm" href="#" role="button" title="display image"           ><i class="fa fa-picture-o"></i> <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span>&nbsp;<span id="bytes"></span></a>
 
 <c:if test='${not empty model.exception}' >
 <div class="alert alert-warning" style="margin-top:1em;">Exception raised: ${model.exception.getClass()} - [ ${model.exception.message} ]<br/>Caused by: ${model.exception.cause.getClass()} - [ ${model.exception.cause.message} ]</div>
@@ -44,6 +44,7 @@ $(document).ready(function() {
     $('#title').empty().text(data.title);
     $('#width').text(data.width);
     $('#height').text(data.height);
+    $('#bytes').text("("+new Intl.NumberFormat().format(Math.round(data.bytes/1000.))+" Kb)");
     $('#image').attr("href", "${pageContext.request.contextPath}" + data.image);
     $('#wikipedia').attr("href", data.wikipedia);
     $('#reload img').attr("src", "<c:url value='/assets/images/animated_orange_refresh_22.png'/>");

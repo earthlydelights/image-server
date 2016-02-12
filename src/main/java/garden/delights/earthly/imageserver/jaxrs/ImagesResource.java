@@ -30,6 +30,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -37,6 +39,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 
+import org.glassfish.jersey.server.ManagedAsync;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,12 +63,9 @@ public class ImagesResource {
     final private Persistor               persistor;
     final private CacheControl            noCacheMaxAgeZeroMustRevalidateNoStore;
 
-    private ImageServerConfig config;
-    
     public ImagesResource() {
         this.threadSafeSource = new ThreadSafeBufferedImage();
         this.persistor        = new Persistor();
-        this.config           = getConfig(ImageServerConfig.class);
         
         // Cache-Control: no-cache, max-age=0, must-revalidate, no-store
         this.noCacheMaxAgeZeroMustRevalidateNoStore = new CacheControl();
@@ -76,10 +76,13 @@ public class ImagesResource {
     }
 
     @POST
+    // http://allegro.tech/2014/10/async-rest.html
+    @ManagedAsync
     @javax.ws.rs.Path("/reload")
-    public Response reload(@Context javax.servlet.http.HttpServletRequest request) throws IOException {
-        this.threadSafeSource.loadImage(request, true /* forces reload */);
-        return Response.noContent().build();
+    public void reload(@Suspended final AsyncResponse                         asyncResponse,
+                       @Context   final javax.servlet.http.HttpServletRequest request) throws IOException {
+        this.threadSafeSource.loadImage(request, true /* forces reload */);;
+        asyncResponse.resume(Boolean.TRUE);
     }
     
     @GET
@@ -189,7 +192,6 @@ public class ImagesResource {
                     
                 } catch (Exception e) {
                     log.error("ignored exception in StreamingOutput.write mehod" , e);
-                } finally {
                 }
             }
         };
@@ -199,8 +201,10 @@ public class ImagesResource {
     }
 
     private class ThreadSafeBufferedImage {
-        final private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+        final private ReentrantReadWriteLock lock;
         
+        private ImageServerConfig config;
+
         private BufferedImage source;
         private Metadata metadata;
         
@@ -211,17 +215,22 @@ public class ImagesResource {
             return this.metadata;
         }
         
-        private void loadImage(HttpServletRequest request, boolean force) throws IOException {
+        public ThreadSafeBufferedImage() {
+            this.lock   = new ReentrantReadWriteLock();
+            this.config = getConfig(ImageServerConfig.class);
+        }
+
+        private Metadata loadImage(HttpServletRequest request, boolean force) throws IOException {
             // if there is already something and nobody asks me to change, do nothing 
             if (this.source != null && !force) {
-                return;
+                return this.metadata;
             }
             
             // reload config
-            ImagesResource.this.config.reload();
+            this.config.reload();
             
             // get url where to load image from 
-            final String            urlParam = ImagesResource.this.config.getImage();
+            final String            urlParam = this.config.getImage();
             if (urlParam == null || urlParam.isEmpty()) {
                 throw new IllegalStateException("no image configured");
             }
@@ -262,14 +271,14 @@ public class ImagesResource {
                 this.metadata = new Metadata(
                         this.source.getWidth(), 
                         this.source.getHeight(),
-                        ImagesResource.this.config.getTitle(), 
-                        ImagesResource.this.config.getImage(),
-                        ImagesResource.this.config.getWikipedia(),
+                        this.config.getTitle(), 
+                        this.config.getImage(),
+                        this.config.getWikipedia(),
                         bytes);
-
+                return this.metadata;
             } finally {
                 this.lock.writeLock().unlock();
-            }       
+            }
         }
 
         private void lazyLoadImage(HttpServletRequest request) throws IOException {
@@ -287,7 +296,7 @@ public class ImagesResource {
             if (widthParam < ret.getWidth() && heightParam < ret.getHeight()) {
                 
                 
-                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam, ImagesResource.this.config.getRandomizerType());
+                final Rectangle<Long> rectangle = getCropRectangle(ret.getWidth(), ret.getHeight(), widthParam, heightParam, this.config.getRandomizerType());
                 
                 ret = this.source.getSubimage( 
                         rectangle.x.intValue(), 
@@ -298,7 +307,7 @@ public class ImagesResource {
                 // write to DB in a thread
                 new Thread(() -> { 
                     try {
-                        persistor.store(rectangle.x.longValue(), rectangle.y.longValue());
+                        ImagesResource.this.persistor.store(rectangle.x.longValue(), rectangle.y.longValue());
                     } catch (Exception e) {
                         log.error(e.getMessage());
                     }

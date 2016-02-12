@@ -17,8 +17,8 @@ public class ComputerTest {
     @Test
     public void test() throws IOException {
         
-        final boolean writeToFile = false; // true; // 
-        final boolean keepFile    = true; // false; //
+        final boolean writeToFile = true;  // false; // 
+        final boolean keepFile    = false; // true;  // 
         
         Path path = null;
         if (writeToFile && System.getenv("HC_HOST") == null) {

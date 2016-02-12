@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
@@ -227,7 +228,7 @@ public class ImagesResource {
             }
             
             // get url where to load image from 
-            final String            urlParam = this.config.getImage();
+            final String            urlParam = URLDecoder.decode(this.config.getImage(), "UTF8");
             if (urlParam == null || urlParam.isEmpty()) {
                 throw new IllegalStateException("no image configured");
             }

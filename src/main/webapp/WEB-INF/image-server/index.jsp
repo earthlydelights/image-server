@@ -41,12 +41,12 @@ $(document).ready(function() {
   $('#clickcount').text("${model.points.size()}");
 
   $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
-    $('#title').empty().text(data.title);
+    $('#title').empty().text(decodeURIComponent(data.title));
     $('#width').text(data.width);
     $('#height').text(data.height);
     $('#bytes').text("("+new Intl.NumberFormat().format(Math.round(data.bytes/1000.))+" Kb)");
-    $('#image').attr("href", "${pageContext.request.contextPath}" + data.image);
-    $('#wikipedia').attr("href", data.wikipedia);
+    $('#image').attr("href", "${pageContext.request.contextPath}" + decodeURIComponent(data.image));
+    $('#wikipedia').attr("href", decodeURIComponent(data.wikipedia));
     $('#reload img').attr("src", "<c:url value='/assets/images/animated_orange_refresh_22.png'/>");
   });
 

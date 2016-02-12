@@ -11,9 +11,9 @@
   <span style="width:100%; margin-left: -30px; width:100%;" >mage Server</span>
 </h1>
 
-<section id="map" style="display: table; background-color:#fafafa; padding: .5em;">
+<section id="attributes" style="display: table; background-color:#fafafa; padding: .5em;">
   <!--  template that will create row in the table-->
-  <script id="rowsTemplate" type="text/x-handlebars-template">{{#each mapEntries}}<%--
+  <script id="rowsTemplate" type="text/x-handlebars-template">{{#each attributes}}<%--
   --%><div style="display: table-row;"><%--
     --%><label style="display: table-cell; white-space: nowrap; padding: 1em 1em 1em 0; white-space: nowrap; text-align:right;">{{key}}</label><%--
     --%><div id="{{key}}" style="display: table-cell;  width:100%;"><%--
@@ -71,13 +71,17 @@ $(document).ready(function() {
           if (ID) {
               ID = _.capitalize(ID);
               var value = j4p.getAttribute( mbean, ID );
+              value = decodeURIComponent(value);
               $(el).attr('value', value);
               $(el).val(value);
               
               $(el).on('change', function(e) {
                 var val = $( this ).val();
-                j4p.setAttribute( mbean, ID, val);
-                window.log(mbean, ID, val);
+                val = encodeURIComponent(val);
+                if (val) {
+                  j4p.setAttribute( mbean, ID, val);
+                  window.log(mbean, ID, val);
+                }
               });              
           }
         });
@@ -144,13 +148,13 @@ $(document).ready(function() {
   };
 
   // /handlebars
-  var wikipedia = rowTemplate({ mapEntries : [
+  var $attributes = rowTemplate({ attributes : [
     { key : "title",      value : ""},
     { key : "image",      value : ""},
     { key : "wikipedia",  value : ""},
     { key : "randomizer", value : ""},
   ]});
-  $('section#map').append(wikipedia);
+  $('section#attributes').append($attributes);
 
   var helper = new JolokiaHelper("<c:url value='/jolokia' />", "imageserver");
   helper.bindTexts($('input'));

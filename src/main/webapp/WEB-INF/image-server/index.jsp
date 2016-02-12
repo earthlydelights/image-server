@@ -13,15 +13,22 @@
 <a id="wikipedia" class="btn btn-secondary btn-sm" href="#" role="button" title="read wikipedia article"  ><i class="fa fa-wikipedia-w"></i></a>
 <a id="image"     class="btn btn-secondary btn-sm" href="#" role="button" title="display image"           ><i class="fa fa-picture-o"></i> <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span></a>
 
+<c:if test='${not empty model.exception}' >
+<div class="alert alert-warning" style="margin-top:1em;">Exception raised: ${model.exception.getClass()} - [ ${model.exception.message} ]<br/>Caused by: ${model.exception.cause.getClass()} - [ ${model.exception.cause.message} ]</div>
+</c:if>
+
 <hr/>
 
 <h2><span id="clickcount"></span> clicks</h2>
+
 
 <div id="thePlot" style="width:100%;height:auto;"></div>
 
 <c:if test='${isGeppaequoWizard}' >
 <button id="reset" class="btn btn-secondary btn-sm btn-danger" style="float:right;">delete all clicks</button>
 </c:if>
+
+
 
 </t:layout>
 
@@ -31,7 +38,7 @@
 
 $(document).ready(function() {
   
-  $('#clickcount').text("${model.size()}");
+  $('#clickcount').text("${model.points.size()}");
 
   $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
     $('#title').empty().text(data.title);
@@ -45,8 +52,8 @@ $(document).ready(function() {
   var thePlot = document.getElementById('thePlot');
   Plotly.plot( 
     thePlot, 
-    [{ x    : [<c:forEach var="p" items="${model}">${p.x},</c:forEach>],
-       y    : [<c:forEach var="p" items="${model}">${p.y},</c:forEach>],
+    [{ x    : [<c:forEach var="p" items="${model.points}">${p.x},</c:forEach>],
+       y    : [<c:forEach var="p" items="${model.points}">${p.y},</c:forEach>],
        mode : 'markers' }], 
     { margin: { b: 50, l: 50, r: 0, t: 20 } },
     { displayModeBar: false } 

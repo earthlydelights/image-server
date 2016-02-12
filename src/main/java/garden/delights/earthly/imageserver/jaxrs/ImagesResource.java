@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -87,12 +88,36 @@ public class ImagesResource {
         return persistor.get();
     }
 
+    public class Both {
+        private List<Point> points;
+        private Exception   exception;
+        public List<Point> getPoints() {
+            return points;
+        }
+        public void setPoints(List<Point> points) {
+            this.points = points;
+        }
+        public Exception getException() {
+            return exception;
+        }
+        public void setException(Exception exception) {
+            this.exception = exception;
+        }
+    };
     @GET
     @javax.ws.rs.Path("/points")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getPointsAsHtml() throws SQLException, IOException  {
-        List<Point> list = persistor.get();
-        return new Viewable("/WEB-INF/image-server/index", list);
+    public Viewable getPointsAsHtml() {
+        Both both = new Both();
+        try {
+            both.setPoints(persistor.get());
+            both.setException(null);
+        } catch (Exception e) {
+            log.warn("ignored exception {}, caused by {}", e.getMessage(), e.getCause() == null ? "" : e.getCause().getMessage());
+            both.setPoints(Collections.emptyList());
+            both.setException(e);
+        }
+        return new Viewable("/WEB-INF/image-server/index", both);
     }
 
     @GET

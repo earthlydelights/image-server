@@ -33,6 +33,11 @@ public class Persistor implements Closeable {
     }
 
     public List<Point> get() throws SQLException, IOException {
+//        if (true) {
+//            NullPointerException npe = new NullPointerException("just for test");
+//            npe.initCause(new RuntimeException("why not?"));
+//            throw npe;
+//        }
         EntityManager em = emf.createEntityManager();
         try {
             @SuppressWarnings("unchecked")

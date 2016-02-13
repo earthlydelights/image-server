@@ -151,6 +151,7 @@ $(document).ready(function() {
   var $attributes = rowTemplate({ attributes : [
     { key : "title",      value : ""},
     { key : "image",      value : ""},
+    { key : "app",        value : ""},
     { key : "wikipedia",  value : ""},
     { key : "randomizer", value : ""},
   ]});

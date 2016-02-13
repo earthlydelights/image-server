@@ -9,7 +9,7 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@WebListener(value="imageServerListener")
+@WebListener(value="ImageServerListener")
 public final class Listener implements ServletContextListener {
 
     @SuppressWarnings("unused")

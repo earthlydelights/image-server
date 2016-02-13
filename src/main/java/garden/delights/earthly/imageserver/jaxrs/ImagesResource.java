@@ -311,6 +311,7 @@ public class ImagesResource {
             return ret;
         }
         
+        @SuppressWarnings("unused")
         @JsonIgnoreProperties
         public class Metadata {
 
@@ -318,12 +319,6 @@ public class ImagesResource {
             private long width;
             @JsonProperty
             private long height;
-            @JsonProperty
-            private String title;
-            @JsonProperty
-            private String wikipedia;
-            @JsonProperty
-            private String image;
             @JsonProperty
             private int bytes;
             
@@ -362,14 +357,22 @@ public class ImagesResource {
                 this.bytes = bytes;
             }
 
+            @JsonProperty
             public String getTitle() {
                 return ThreadSafeBufferedImage.this.config.getTitle();
             }
 
+            @JsonProperty
             public String getImage() {
                 return ThreadSafeBufferedImage.this.config.getImage();
             }
 
+            @JsonProperty
+            public String getApp() {
+                return ThreadSafeBufferedImage.this.config.getApp();
+            }
+
+            @JsonProperty
             public String getWikipedia() {
                 return ThreadSafeBufferedImage.this.config.getWikipedia();
             }

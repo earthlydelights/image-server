@@ -28,6 +28,16 @@ public final class ImageServerConfig extends AbstractConfig {
     }
 
     @Managed
+    public String getApp() {
+        return get("app");
+    }
+
+    @Managed
+    public void setApp(String app) {
+        set("app", app);
+    }
+
+    @Managed
     public String getTitle() {
         return get("title");
     }

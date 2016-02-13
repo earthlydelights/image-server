@@ -23,6 +23,19 @@
         <location>/WEB-INF/404.jsp</location>
     </error-page>
 
+    <!--  http://stackoverflow.com/questions/19729370/servletcontextlistener-execution-order  -->
+    <listener>
+        <display-name>ECMListener</display-name>
+        <listener-class>net.aequologica.neo.geppaequo.cmis.ECMListener</listener-class>
+    </listener>
+    <listener>
+        <display-name>ImageServerListener</display-name>
+        <listener-class>garden.delights.earthly.imageserver.config.Listener</listener-class>
+    </listener>
+    <listener>
+        <display-name>JMXListener</display-name>
+        <listener-class>net.aequologica.neo.geppaequo.servlet.JMXListener</listener-class>
+    </listener>
 
     <servlet>
         <servlet-name>jsp</servlet-name>

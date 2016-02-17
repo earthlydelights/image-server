@@ -8,7 +8,7 @@
             <property name="eclipselink.ddl-generation" value="create-or-extend-tables" />
             <property name="eclipselink.logging.level" value="FINE" />
             <property name="eclipselink.weaving" value="static" />
-            <property name="eclipselink.weaving.internal" value="false" />
+            <property name="eclipselink.weaving.internal" value="true" />
         </properties>
     </persistence-unit>
 

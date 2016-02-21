@@ -5,7 +5,7 @@
 %><%
   Boolean isWizard = request.isUserInRole("wizard") || request.isUserInRole("BUILTIN\\Administrators");
   request.setAttribute("isGeppaequoWizard", isWizard);
-%><t:layout module="image-server">
+%><t:layout>
 <style>
 #app > img{
 opacity:.666;

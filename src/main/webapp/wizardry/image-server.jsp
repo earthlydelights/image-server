@@ -24,12 +24,17 @@
 
 <div style="position: relative;width: 100%; margin-top: 1em;">
   &nbsp;
+  <div style="position: absolute; left: 0; top:0;">
+    <button id="loadMetadata" type="button" class="btn btn-default">
+      <span>load metadata to application<img id="ajaxLoading_loadMetadata" src="<c:url value='/assets/images/animated_orange_refresh_22.png'/>"></span>
+    </button>
+  </div>
   <div style="position: absolute;right: 0; top:0;">
     <button id="reload" type="button" class="btn btn-default">
-      <span>reload <img id="ajaxLoading_reload" src="<c:url value='/assets/images/animated_orange_refresh_22.png'/>"></span>
+      <span>reset from document<img id="ajaxLoading_reload" src="<c:url value='/assets/images/animated_orange_refresh_22.png'/>"></span>
     </button>
     <button id="save" type="button" class="btn btn-default">
-      <span>save <img id="ajaxLoading_save" src="<c:url value='/assets/images/animated_orange_refresh_22.png'/>"></span>
+      <span>save to document service<img id="ajaxLoading_save" src="<c:url value='/assets/images/animated_orange_refresh_22.png'/>"></span>
     </button>
   </div>
 </div>
@@ -133,6 +138,21 @@ $(document).ready(function() {
           now: now,
         }));
     }
+
+    $("button#loadMetadata").click(function( event ) {
+      $("#ajaxLoading_loadMetadata").attr({src :"<c:url value='/assets/images/animated_orange_refresh_22.gif'/>" });
+      $.post( "<c:url value='/api/earthly-delights-garden/image/v1/reload'/>")  
+        .done(function() {
+          alert('done!');
+        })
+        .fail(function() {
+          alert('error!');
+        })
+        .always(function() {
+          $("#ajaxLoading_loadMetadata").attr({src :"<c:url value='/assets/images/animated_orange_refresh_22.png'/>" });
+      });
+      event.preventDefault();
+    });
 
     $("button#reload").click(function( event ) {
       _this_.reload();

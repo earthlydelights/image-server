@@ -9,7 +9,7 @@ import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-@ApplicationPath("earthly-delights-garden-api")
+@ApplicationPath("api/earthly-delights-garden")
 public class Application extends ResourceConfig {
 
     public Application() {

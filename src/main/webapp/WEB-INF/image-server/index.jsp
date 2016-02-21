@@ -48,7 +48,7 @@ $(document).ready(function() {
   
   $('#clickcount').text("${model.points.size()}");
 
-  $.getJSON( "<c:url value='/earthly-delights-garden-api/image/v1/metadata' />", function( data ) {
+  $.getJSON( "<c:url value='/api/earthly-delights-garden/image/v1/metadata' />", function( data ) {
     $('#title').empty().text(decodeURIComponent(data.title));
     $('#width').text(data.width);
     $('#height').text(data.height);
@@ -77,7 +77,7 @@ $(document).ready(function() {
     
     $.ajax({
       type : "DELETE",
-      url  : "<c:url value='/earthly-delights-garden-api/image/v1/points' />",
+      url  : "<c:url value='/api/earthly-delights-garden/image/v1/points' />",
     }).done(function( data ) {
       $('#clickcount').text("0");
       thePlot.data = [{

@@ -1,1 +1,1 @@
-<%@ page contentType="text/html" pageEncoding="UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %><c:redirect url='/earthly-delights-garden-api/image/v1/points'/>
+<%@ page contentType="text/html" pageEncoding="UTF-8" %><%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %><c:redirect url='/api/earthly-delights-garden/image/v1/points'/>

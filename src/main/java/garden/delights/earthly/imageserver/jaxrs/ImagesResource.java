@@ -169,8 +169,15 @@ public class ImagesResource {
             quality = (float)qualityParam/100f;
         }
         
+        // only store coordinates when request comes from main front-end
+        boolean storeCropCoordinates = false;
+        String referer = request.getHeader("Referer");
+        if (referer.startsWith("http://earthlydelights.garden")) {
+            storeCropCoordinates = true;
+        }
+        
         // get sub-image (will be full image if dimensions are larger)
-        final BufferedImage croppedImage = this.threadSafeSource.getCroppedImage(widthParam, heightParam);
+        final BufferedImage croppedImage = this.threadSafeSource.getCroppedImage(widthParam, heightParam, storeCropCoordinates);
 
         // prepare streaming
         StreamingOutput streamOut = new StreamingOutput() {
@@ -280,7 +287,7 @@ public class ImagesResource {
             loadImage(request, false);
         }
         
-        private BufferedImage getCroppedImage(final int widthParam, final int heightParam) throws IOException {
+        private BufferedImage getCroppedImage(final int widthParam, final int heightParam, boolean storeCoordinates) throws IOException {
             BufferedImage ret;
             this.lock.readLock().lock();
             try {
@@ -299,14 +306,16 @@ public class ImagesResource {
                         rectangle.w.intValue(), 
                         rectangle.h.intValue());
                 
-                // write to DB in a thread
-                new Thread(() -> { 
-                    try {
-                        ImagesResource.this.persistor.store(rectangle.x.longValue(), rectangle.y.longValue());
-                    } catch (Exception e) {
-                        log.error(e.getMessage());
-                    }
-                }).start();
+                if (storeCoordinates) {
+                    // write to DB in a thread
+                    new Thread(() -> { 
+                        try {
+                            ImagesResource.this.persistor.store(rectangle.x.longValue(), rectangle.y.longValue());
+                        } catch (Exception e) {
+                            log.error(e.getMessage());
+                        }
+                    }).start();
+                }
             }
             return ret;
         }

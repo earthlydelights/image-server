@@ -172,7 +172,7 @@ public class ImagesResource {
         // only store coordinates when request comes from main front-end
         boolean storeCropCoordinates = false;
         String referer = request.getHeader("Referer");
-        if (referer.startsWith("http://earthlydelights.garden")) {
+        if (referer!=null && referer.startsWith("http://earthlydelights.garden")) {
             storeCropCoordinates = true;
         }
         

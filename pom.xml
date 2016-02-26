@@ -33,7 +33,6 @@
             <groupId>net.aequologica.neo</groupId>
             <artifactId>geppaequo-tags</artifactId>
             <version>0.4.5-SNAPSHOT</version>
-            <classifier>${java-version-classifier}</classifier>
         </dependency>
 
         <!-- jersey -->
@@ -136,8 +135,6 @@
                             <attachClasses>true</attachClasses>
                             <!-- cf. http://goo.gl/OV8Cu9 -->
                             <packagingExcludes>*.png, META-INF/MANIFEST.MF, WEB-INF/lib/*slf4j-*.jar,WEB-INF/lib/*log4j-*.jar,WEB-INF/lib/*commons-logging-*.jar</packagingExcludes>
-                            <!--java7 / java8 dance -->
-                            <classifier />
                         </configuration>
                     </plugin>
                     <plugin>

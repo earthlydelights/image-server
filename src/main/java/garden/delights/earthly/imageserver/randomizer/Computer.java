@@ -34,8 +34,8 @@ class Computer {
     
     final EnumMap<Function, F> operations;
     final MapInterface          store;
-          
-    Computer(Dimension<Long> big, Dimension<Long> small) {
+    
+        Computer(Dimension<Long> big, Dimension<Long> small) {
         this.big            = big;
         this.small          = small;
         final long α        = Math.min(this.small.w, this.big.w - this.small.w);
@@ -47,6 +47,58 @@ class Computer {
         this.operations     = new EnumMap<Computer.Function, Computer.F>(Computer.Function.class);
         this.store          = new Store();
         
+        //----------------------------------------------------------////////////////////////////////////////////////////////////////
+        final F multiply = (a, b) -> (a + 1) * (b + 1);             //  multiply big = (5x5)                                        
+                                                                    //                                                              
+                                                                    //      x * y |     0       1       2       3       4           
+                                                                    //      ──────┼─────────────────────────────────────────────    
+                                                                    //          0 │     1       2       3       4       5           
+                                                                    //          1 │     2       4       6       8      10           
+                                                                    //          2 │     3       6       9      12      15           
+                                                                    //          3 │     4       8      12      16      20           
+                                                                    //          4 │     5      10      15      20      25           
+                                                                    //                                                              
+
+        //----------------------------------------------------------///////////////////////////////////////////////////////////////
+        final F mirror = (x, y) -> {                                //  mirror smallest = (2x2)                                    
+            long a, b;                                              //                                                             
+                                                                    //       frqs |     0       1       2       3       4          
+            if (x < this.smallest.w) {                              //      ──────┼─────────────────────────────────────────────   
+                a = x;                                              //          0 │     1       2       2       2       1          
+            } else if (this.big.w - this.smallest.w - 1 < x) {      //          1 │     2       4       4       4       2          
+                a = this.big.w - x - 1;                             //          2 │     2       4       4       4       2          
+            } else {                                                //          3 │     2       4       4       4       2          
+                a = this.smallest.w - 1;                            //          4 │     1       2       2       2       1          
+            }
+
+            if (y < this.smallest.h) {
+                b = y;
+            } else if (this.big.h - this.smallest.h - 1 < y) {
+                b = this.big.h - y - 1;
+            } else {
+                b = this.smallest.h - 1;
+            }
+            if (a < 0) {
+                a = 0;
+            }
+            if (b < 0) {
+                b = 0;
+            }
+
+            return multiply.get(a, b);
+        };
+                                        
+        //----------------------------------------------------------/////////////////////////////////////////////////////
+        final F weightOfCrop = (a, b) -> {                          //  weightOfCrop  = crop 2x2                         
+            long ret = 0L;                                          //                                                   
+            for (long i=0; i < this.small.w; i++) {                 //        weight |     0       1       2       3     
+                for (long j=0; j < this.small.h; j++) {             //         ──────┼─────────────────────────────────  
+                    ret += mirror.get(a + i, b + j);                //             0 │     9      12      12       9     
+                }                                                   //             1 │    12      16      16      12     
+            }                                                       //             2 │    12      16      16      12     
+            return ret;                                             //             3 │     9      12      12       9     
+        };                                                          //                                                   
+
         operations.put(Function.MULTIPLY,          multiply);
         operations.put(Function.MIRROR,            mirror);
         operations.put(Function.WEIGHT_OF_CROP,    weightOfCrop);
@@ -56,59 +108,6 @@ class Computer {
     interface F {
         long get(long x, long y);
     }
-
-    //----------------------------------------------------------////////////////////////////////////////////////////////////////
-    final F multiply = (a, b) -> (a + 1) * (b + 1);             //  multiply big = (5x5)                                        
-                                                                //                                                              
-                                                                //      x * y |     0       1       2       3       4           
-                                                                //      ──────┼─────────────────────────────────────────────    
-                                                                //          0 │     1       2       3       4       5           
-                                                                //          1 │     2       4       6       8      10           
-                                                                //          2 │     3       6       9      12      15           
-                                                                //          3 │     4       8      12      16      20           
-                                                                //          4 │     5      10      15      20      25           
-                                                                //                                                              
-
-    //----------------------------------------------------------///////////////////////////////////////////////////////////////
-    final F mirror = (x, y) -> {                                //  mirror smallest = (2x2)                                    
-        long a, b;                                              //                                                             
-                                                                //       frqs |     0       1       2       3       4          
-        if (x < this.smallest.w) {                              //      ──────┼─────────────────────────────────────────────   
-            a = x;                                              //          0 │     1       2       2       2       1          
-        } else if (this.big.w - this.smallest.w - 1 < x) {      //          1 │     2       4       4       4       2          
-            a = this.big.w - x - 1;                             //          2 │     2       4       4       4       2          
-        } else {                                                //          3 │     2       4       4       4       2          
-            a = this.smallest.w - 1;                            //          4 │     1       2       2       2       1          
-        }
-
-        if (y < this.smallest.h) {
-            b = y;
-        } else if (this.big.h - this.smallest.h - 1 < y) {
-            b = this.big.h - y - 1;
-        } else {
-            b = this.smallest.h - 1;
-        }
-        if (a < 0) {
-            a = 0;
-        }
-        if (b < 0) {
-            b = 0;
-        }
-
-        return multiply.get(a, b);
-    };
-                                    
-    //----------------------------------------------------------/////////////////////////////////////////////////////
-    final F weightOfCrop = (a, b) -> {                          //  weightOfCrop  = crop 2x2                         
-        long ret = 0L;                                          //                                                   
-        for (long i=0; i < this.small.w; i++) {                 //        weight |     0       1       2       3     
-            for (long j=0; j < this.small.h; j++) {             //         ──────┼─────────────────────────────────  
-                ret += mirror.get(a + i, b + j);                //             0 │     9      12      12       9     
-            }                                                   //             1 │    12      16      16      12     
-        }                                                       //             2 │    12      16      16      12     
-        return ret;                                             //             3 │     9      12      12       9     
-    };                                                          //                                                   
-    
 
     enum Function {
         MULTIPLY("x * y"), MIRROR("frqs"), WEIGHT_OF_CROP("crop");
@@ -135,6 +134,7 @@ class Computer {
          */
         void lazyLoad() {
             if (this.segments == null) {
+                F weightOfCrop = operations.get(Function.WEIGHT_OF_CROP);
                 final int length = (int)(biggest.w * biggest.h);
                 
                 this.segments = new double[length + 1];
@@ -144,7 +144,7 @@ class Computer {
                     int index = 0;
                     for (long j=0; j<biggest.h; j++) {
                         for (long i=0; i<biggest.w; i++) {                                                              
-                            final long weight = Computer.this.weightOfCrop.get(i,j);
+                            final long weight = weightOfCrop.get(i,j);
                             this.segments[index] = weight;
                             this.totalWeight += weight;
                             index++;

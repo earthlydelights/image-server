@@ -197,6 +197,15 @@
         <servlet-name>jolokia-agent</servlet-name>
         <url-pattern>/jolokia/*</url-pattern>
     </servlet-mapping>
+    <!-- The mapping for the JSP servlet -->
+    <servlet-mapping>
+        <servlet-name>jsp</servlet-name>
+        <url-pattern>*.jsp</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>jsp</servlet-name>
+        <url-pattern>*.jspi</url-pattern>
+    </servlet-mapping>
 
     <login-config>
         <auth-method>FORM</auth-method>

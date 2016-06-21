@@ -127,14 +127,14 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-war-plugin</artifactId>
-                        <configuration combine.self="override">
+                        <configuration>
                             <!-- no default value -->
-                            <failOnMissingWebXml>false</failOnMissingWebXml>
-                            <dependentWarExcludes>WEB-INF/web.xml,WEB-INF/lib/*geppaequo*.*,WEB-INF/lib/geppaequo*.*,WEB-INF/classes/META-INF/persistence.xml,META-INF/persistence.xml</dependentWarExcludes>
-                            <outputFileNameMapping>@{groupId}@...@{artifactId}@-@{version}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
-                            <attachClasses>true</attachClasses>
+                            <failOnMissingWebXml combine.self="override">false</failOnMissingWebXml>
+                            <dependentWarExcludes combine.self="override">WEB-INF/web.xml,WEB-INF/lib/*geppaequo*.*,WEB-INF/lib/geppaequo*.*,WEB-INF/classes/META-INF/persistence.xml,META-INF/persistence.xml</dependentWarExcludes>
+                            <outputFileNameMapping combine.self="override">@{groupId}@...@{artifactId}@-@{version}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
+                            <attachClasses combine.self="override">true</attachClasses>
                             <!-- cf. http://goo.gl/OV8Cu9 -->
-                            <packagingExcludes>*.png, META-INF/MANIFEST.MF, WEB-INF/lib/*slf4j-*.jar,WEB-INF/lib/*log4j-*.jar,WEB-INF/lib/*commons-logging-*.jar</packagingExcludes>
+                            <packagingExcludes combine.self="override">*.png, META-INF/MANIFEST.MF, WEB-INF/lib/*slf4j-*.jar,WEB-INF/lib/*log4j-*.jar,WEB-INF/lib/*commons-logging-*.jar</packagingExcludes>
                         </configuration>
                     </plugin>
                     <plugin>

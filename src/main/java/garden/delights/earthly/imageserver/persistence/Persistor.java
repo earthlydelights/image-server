@@ -1,88 +1,100 @@
 package garden.delights.earthly.imageserver.persistence;
 
-import static net.aequologica.neo.geppaequo.persistence.DbUtils.getEntityManagerFactory;
+import static garden.delights.earthly.imageserver.persistence.Persistor.ImageServerFactory.IMAGESERVER;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Persistor implements Closeable {
+import net.aequologica.neo.geppaequo.persistence.DbHelpers.AbstractFactory;
+import net.aequologica.neo.geppaequo.persistence.DbHelpers.CloseableEntityManager;
+import net.aequologica.neo.geppaequo.persistence.DbHelpers.CloseableEntityTransaction;
+import net.aequologica.neo.geppaequo.persistence.DbHelpers.Factory;
+
+public class Persistor {
 
     @SuppressWarnings("unused")
     private final static Logger log = LoggerFactory.getLogger(Persistor.class);
     
-    final private EntityManagerFactory emf;
+    private final Factory factory;
     
     public Persistor() {
-        this.emf = getEntityManagerFactory("image-server");
+        this.factory = IMAGESERVER;
     }
 
-    @Override
-    public void close() throws IOException {
-        if (emf != null && emf.isOpen()) {
-            this.emf.close();
-        }
-    }
-
-    public List<Point> get() throws SQLException, IOException {
-        EntityManager em = emf.createEntityManager();
-        try {
+    public List<Point> get() throws IOException {
+        try (CloseableEntityManager cem = CloseableEntityManager.create(this.factory)) {
             @SuppressWarnings("unchecked")
-            List<Point> resultList = em.createNamedQuery("AllPoints").getResultList();
+            List<Point> resultList = cem.em.createNamedQuery("AllPoints").getResultList();
             return resultList;
-        } finally {
-            em.close();
         }
     }
 
-    public long getCount() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            Object pointCount = em.createNamedQuery("PointsCount").getSingleResult();
+    public long getCount() throws IOException {
+        try (CloseableEntityManager cem = CloseableEntityManager.create(this.factory)) {
+            Object pointCount = cem.em.createNamedQuery("PointsCount").getSingleResult();
             if (pointCount instanceof Number) {
                 return ((Number)pointCount).longValue();
             } else {
                 return Long.valueOf(pointCount.toString());
             }
-        } finally {
-            em.close();
         }
     }
     
     public void store(long x, long y) throws ServletException, IOException, SQLException {
-        EntityManager em = emf.createEntityManager();
-        try {
+        try (CloseableEntityManager cem = CloseableEntityManager.create(this.factory)) {
             Point person = new Point();
             person.setX(x);
             person.setY(y);
-            em.getTransaction().begin();
-            em.persist(person);
-            em.getTransaction().commit();
-        } finally {
-            em.close();
+            cem.em.getTransaction().begin();
+            cem.em.persist(person);
+            cem.em.getTransaction().commit();
         }
     }
     
     public int deleteAll() throws SQLException, IOException {
-        EntityManager em = emf.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            int theNumberOfEntitiesDeleted = em.createNamedQuery("DeleteAllPoints").executeUpdate();
-            em.getTransaction().commit();
-            return theNumberOfEntitiesDeleted;
-        } finally {
-            em.close();
+        try (CloseableEntityManager cem = CloseableEntityManager.create(this.factory)) {
+            try (CloseableEntityTransaction cet = CloseableEntityTransaction.create(cem.em)) {
+                int theNumberOfEntitiesDeleted = cem.em.createNamedQuery("DeleteAllPoints").executeUpdate();
+                cet.t.commit();
+                return theNumberOfEntitiesDeleted;
+            }
         }
     }
 
-    
+    public enum ImageServerFactory implements net.aequologica.neo.geppaequo.persistence.DbHelpers.Factory {
+        
+        IMAGESERVER;
+        
+        AbstractFactory abstractFactory = new AbstractFactory() {
+
+            @Override
+            protected String getPersistenceUnitName() {
+                return "image-server";
+            }
+            
+        };
+
+        @Override
+        public EntityManagerFactory getEntityManagerFactory() {
+            return abstractFactory.getEntityManagerFactory();
+        }
+
+        @Override
+        public Exception getException() {
+            return abstractFactory.getException();
+        }
+
+        @Override
+        public EntityManagerFactory load() {
+            return abstractFactory.load();
+        }
+    }
     
 }

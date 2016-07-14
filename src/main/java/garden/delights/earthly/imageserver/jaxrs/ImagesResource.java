@@ -1,6 +1,6 @@
 package garden.delights.earthly.imageserver.jaxrs;
 
-import static net.aequologica.neo.geppaequo.config.ConfigRegistry.getConfig;
+import static net.aequologica.neo.geppaequo.config.ConfigRegistry.CONFIG_REGISTRY;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
@@ -225,7 +225,7 @@ public class ImagesResource {
         
         public ThreadSafeBufferedImage() {
             this.lock   = new ReentrantReadWriteLock();
-            this.config = getConfig(ImageServerConfig.class);
+            this.config = CONFIG_REGISTRY.getConfig(ImageServerConfig.class);
         }
 
         private Metadata loadImage(HttpServletRequest request, boolean force) throws IOException {

@@ -1,6 +1,6 @@
 package garden.delights.earthly.imageserver.config;
 
-import static net.aequologica.neo.geppaequo.config.ConfigRegistry.scanConfigs;
+import static net.aequologica.neo.geppaequo.config.ConfigRegistry.CONFIG_REGISTRY;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -17,7 +17,7 @@ public final class Listener implements ServletContextListener {
 
     @Override
     public void contextInitialized(final ServletContextEvent servletContextEvent) {
-        scanConfigs(new String[] {"garden.delights.earthly.imageserver.config"});
+        CONFIG_REGISTRY.scanConfigs(new String[] {"garden.delights.earthly.imageserver.config"});
     }
 
     @Override

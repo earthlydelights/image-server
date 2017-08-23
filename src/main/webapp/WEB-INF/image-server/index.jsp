@@ -16,9 +16,9 @@ opacity:1;
 </style>
 <h1><span id="title"></span></h1>
 
-<a id="reload"    class="btn btn-secondary btn-sm" href="#" role="button" title="reload page (F5)"        ><img src="<c:url value='/assets/images/animated_orange_refresh_22.gif'/>"></a>
-<a id="wikipedia" class="btn btn-secondary btn-sm" href="#" role="button" title="read wikipedia article"  ><i class="fa fa-wikipedia-w"></i></a>
-<a id="image"     class="btn btn-secondary btn-sm" href="#" role="button" title="display image"           ><i class="fa fa-picture-o"></i> <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span>&nbsp;<span id="bytes"></span></a>
+<a id="reload"    class="btn btn-outline-secondary btn-sm" href="#" role="button" title="reload page (F5)"        ><img src="<c:url value='/assets/images/animated_orange_refresh_22.gif'/>"></a>
+<a id="wikipedia" class="btn btn-outline-secondary btn-sm" href="#" role="button" title="read wikipedia article"  ><i class="fa fa-wikipedia-w"></i></a>
+<a id="image"     class="btn btn-outline-secondary btn-sm" href="#" role="button" title="display image"           ><i class="fa fa-picture-o"></i> <span id="width"></span>&nbsp;x&nbsp;<span id="height"></span>&nbsp;<span id="bytes"></span></a>
 <a id="app"                                                               title="Earthly Delights Garden "><img alt="" class="img-circle" src="<c:url value='/images/earthly.delights.garden-32x32.png'/>"></a>
 
 <c:if test='${not empty model.exception}' >
@@ -33,7 +33,7 @@ opacity:1;
 <div id="thePlot" style="width:100%;height:auto;"></div>
 
 <c:if test='${isGeppaequoWizard}' >
-<button id="reset" class="btn btn-secondary btn-sm btn-danger" style="float:right;">delete all clicks</button>
+<button id="reset" class="btn btn-outline-secondary btn-sm btn-danger" style="float:right;">delete all clicks</button>
 </c:if>
 
 

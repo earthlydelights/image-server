@@ -197,6 +197,31 @@
             </build>
         </profile>
 
+       <profile>
+           <id>jaxrs-analyzer</id>
+           <activation>
+                <property>
+                    <name>env.build_quality</name>
+                    <value>milestone</value>
+                </property>
+           </activation>
+           <build>
+               <plugins>
+                   <plugin>
+                       <groupId>com.sebastian-daschner</groupId>
+                       <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
+                       <executions>
+                           <execution>
+                               <goals>
+                                   <goal>analyze-jaxrs</goal>
+                               </goals>
+                           </execution>
+                       </executions>
+                   </plugin>
+               </plugins>
+           </build>
+       </profile>
+
     </profiles>
 
     <build>
@@ -211,19 +236,6 @@
                     </archive>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>com.sebastian-daschner</groupId>
-                <artifactId>jaxrs-analyzer-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>analyze-jaxrs</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
 

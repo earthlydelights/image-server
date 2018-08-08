@@ -49,11 +49,11 @@ public class Persistor {
     
     public void store(long x, long y) throws ServletException, IOException, SQLException {
         try (CloseableEntityManager cem = CloseableEntityManager.create(this.factory)) {
-            Point person = new Point();
-            person.setX(x);
-            person.setY(y);
+            Point point = new Point();
+            point.setX(x);
+            point.setY(y);
             cem.em.getTransaction().begin();
-            cem.em.persist(person);
+            cem.em.persist(point);
             cem.em.getTransaction().commit();
         }
     }

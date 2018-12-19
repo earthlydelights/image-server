@@ -81,8 +81,8 @@
         </dependency>
         <!-- el-api -->
         <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
         </dependency>
         <!-- jsp -->
         <dependency>

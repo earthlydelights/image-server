@@ -19,6 +19,16 @@ public class Application extends ResourceConfig {
         register(MultiPartFeature.class);
         register(JacksonJsonProvider.class);
 
+        register(LoggingFeature.class);
+        register(JspMvcFeature.class);
+        register(MultiPartFeature.class);
+        register(JacksonJsonProvider.class);
+        
+        // geppaequo
+        register(net.aequologica.neo.geppaequo.jaxrs.ImagesResource.class);
+        register(net.aequologica.neo.geppaequo.jaxrs.StnemucodResource.class);
+        register(net.aequologica.neo.geppaequo.jaxrs.UUIDResource.class);
+
         register(ImagesResource.class);
         
         

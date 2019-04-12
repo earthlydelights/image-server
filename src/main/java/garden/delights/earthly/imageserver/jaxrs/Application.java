@@ -9,7 +9,7 @@ import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-@ApplicationPath("api/earthly-delights-garden")
+@ApplicationPath("api")
 public class Application extends ResourceConfig {
 
     public Application() {
@@ -19,16 +19,15 @@ public class Application extends ResourceConfig {
         register(MultiPartFeature.class);
         register(JacksonJsonProvider.class);
 
-        register(LoggingFeature.class);
-        register(JspMvcFeature.class);
-        register(MultiPartFeature.class);
-        register(JacksonJsonProvider.class);
-        
+        // serioulizer
+        register(net.aequologica.neo.serioulizer.jaxrs.service.Resource.class);
+
         // geppaequo
         register(net.aequologica.neo.geppaequo.jaxrs.ImagesResource.class);
         register(net.aequologica.neo.geppaequo.jaxrs.StnemucodResource.class);
         register(net.aequologica.neo.geppaequo.jaxrs.UUIDResource.class);
 
+        // this
         register(ImagesResource.class);
         
         

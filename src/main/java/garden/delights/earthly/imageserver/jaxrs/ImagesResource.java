@@ -55,7 +55,7 @@ import garden.delights.earthly.imageserver.randomizer.RectangleRandomizer;
 import garden.delights.earthly.imageserver.randomizer.RectangleRandomizerUtil.Rectangle;
 
 @Singleton
-@javax.ws.rs.Path("/image/v1")
+@javax.ws.rs.Path("earthly-delights-garden/image/v1")
 public class ImagesResource {
 
     private final static Logger log = LoggerFactory.getLogger(ImagesResource.class);

@@ -39,6 +39,11 @@
             <artifactId>geppaequo-tags</artifactId>
             <version>0.6.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>net.aequologica.neo</groupId>
+            <artifactId>serioulizer-rest</artifactId>
+            <version>0.1.4-SNAPSHOT</version>
+        </dependency>
 
         <!-- jersey -->
         <dependency>
